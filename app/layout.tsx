@@ -3,6 +3,9 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import AuthProvider from "./AuthProvider"
 import Recoil from "@/components/Recoil"
+import Alert from "@/components/Alert"
+import AlertWithLink from "@/components/AlertWithLink"
+import Loading from "@/components/Loading"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,7 +23,12 @@ export default function RootLayout({
     <AuthProvider>
       <html lang='kr'>
         <body className={inter.className}>
-          <Recoil>{children}</Recoil>
+          <Recoil>
+            {children}
+            <Alert />
+            <AlertWithLink />
+            <Loading />
+          </Recoil>
         </body>
       </html>
     </AuthProvider>

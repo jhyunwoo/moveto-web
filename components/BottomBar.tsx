@@ -18,7 +18,10 @@ export default function BottomBar() {
         <Link href='/' className='flex w-full items-center justify-center '>
           <ArchiveBoxArrowDownIcon className='h-8 w-8 text-green-800' />
         </Link>
-        <Link href='/user' className='flex w-full items-center justify-center '>
+        <Link
+          href='/profile'
+          className='flex w-full items-center justify-center '
+        >
           <UserCircleIcon className='h-8 w-8 text-green-800' />
         </Link>
       </div>

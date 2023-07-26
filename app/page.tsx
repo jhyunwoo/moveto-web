@@ -1,5 +1,6 @@
 import BottomBar from "@/components/BottomBar"
 import { Metadata } from "next"
+import SearchFile from "./SearchFile"
 
 export const metadata: Metadata = {
   title: "모베토",
@@ -12,6 +13,7 @@ export default function Home() {
       <BottomBar />
       <div className='flex w-full max-w-xl flex-col items-center justify-center'>
         <div className='mr-auto pl-1 text-base font-bold '>접근 코드</div>
+        <SearchFile />
       </div>
     </div>
   )

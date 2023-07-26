@@ -37,24 +37,21 @@ export default function SearchFile() {
   const paramsCode = params.get("code")?.replace("_", " ")
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      const fileInfo = await pb
-        .collection("files")
-        .getFirstListItem(`accessCode="${data.accessCode}"`)
-
-      if (fileInfo.files.length > 0) {
-        setFile({
-          id: fileInfo.id,
-          fileNames: fileInfo.fileNames,
-          files: fileInfo.files,
-        })
-        setFileNames(stringToArray(fileInfo.fileNames))
-      } else {
-        setLink(fileInfo.link)
-      }
-    } catch {
-      setAlert({ message: "접근 코드 오류", warn: false, error: true })
-    }
+    // try {
+    //   const fileInfo // 접근 코드를 찾고 파일 URL을 가져옴
+    //   if (fileInfo.files.length > 0) {
+    //     setFile({
+    //       id: fileInfo.id,
+    //       fileNames: fileInfo.fileNames,
+    //       files: fileInfo.files,
+    //     })
+    //     setFileNames(stringToArray(fileInfo.fileNames))
+    //   } else {
+    //     setLink(fileInfo.link)
+    //   }
+    // } catch {
+    //   setAlert({ message: "접근 코드 오류", warn: false, error: true })
+    // }
   }
 
   async function downloadFileFromServer(i: number) {
@@ -82,24 +79,23 @@ export default function SearchFile() {
 
   useEffect(() => {
     async function getFileList() {
-      try {
-        const fileInfo = await pb
-          .collection("files")
-          .getFirstListItem(`accessCode="${paramsCode}"`)
-
-        if (fileInfo.files.length > 0) {
-          setFile({
-            id: fileInfo.id,
-            fileNames: fileInfo.fileNames,
-            files: fileInfo.files,
-          })
-          setFileNames(stringToArray(fileInfo.fileNames))
-        } else {
-          setLink(fileInfo.link)
-        }
-      } catch {
-        setAlert({ message: "접근 코드 오류", warn: false, error: true })
-      }
+      // try {
+      //   const fileInfo = await pb
+      //     .collection("files")
+      //     .getFirstListItem(`accessCode="${paramsCode}"`)
+      //   if (fileInfo.files.length > 0) {
+      //     setFile({
+      //       id: fileInfo.id,
+      //       fileNames: fileInfo.fileNames,
+      //       files: fileInfo.files,
+      //     })
+      //     setFileNames(stringToArray(fileInfo.fileNames))
+      //   } else {
+      //     setLink(fileInfo.link)
+      //   }
+      // } catch {
+      //   setAlert({ message: "접근 코드 오류", warn: false, error: true })
+      // }
     }
     if (paramsCode) {
       setValue("accessCode", paramsCode)
