@@ -125,15 +125,24 @@ export default function FileUpload() {
 
     console.log(uploadUrl)
 
-    for (let i = 0; i < uploadUrl.uploadUrl.length; i += 1) {
-      console.log(uploadUrl.uploadUrl[i])
-      const result = await fetch(uploadUrl.uploadUrl[i].uploadUrl, {
+    for (let i = 0; i < uploadUrl.urlList.length; i += 1) {
+      console.log(uploadUrl.urlList[i])
+      const result = await fetch(uploadUrl.urlList[i].uploadUrl, {
         headers: { "Content-Type": "multipart/form-data" },
         method: "PUT",
         body: fileInput.current.files[i],
       })
       console.log(result)
     }
+    const requestCode = await fetch("/api/share/upload", {
+      method: "PUT",
+      body: JSON.stringify({ shareId: uploadUrl.share.id }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    const createCode = await requestCode.json()
+    console.log(createCode)
     setAlert({ message: "업로드 완료", warn: false, error: false })
     if (!fileInput.current) return
     fileInput.current.value = ""
