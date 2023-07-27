@@ -23,7 +23,7 @@ export default async function User() {
         <div className='flex w-full justify-between '>
           <div className='py-1 text-lg font-semibold'>{session.user?.name}</div>
           <div className='flex items-center justify-center rounded-md bg-green-900 p-1 px-2 font-semibold text-white'>
-            user plan
+            {session.user?.plan}
           </div>
         </div>
         <div className=' flex items-center space-x-1 pb-6'>

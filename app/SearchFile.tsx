@@ -1,14 +1,16 @@
 "use client"
 
-import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline"
+import {
+  ExclamationCircleIcon,
+  MagnifyingGlassCircleIcon,
+} from "@heroicons/react/24/outline"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { useEffect, useState } from "react"
 import { nanoid } from "nanoid"
-import axios from "axios"
-import { useSetRecoilState } from "recoil"
-import { alertState, loadingState } from "@/lib/recoil"
-import stringToArray from "@/lib/stringToArray"
+import { useRecoilValue, useSetRecoilState } from "recoil"
+import { alertState, fileDownloadingState, loadingState } from "@/lib/recoil"
 import { useRouter, useSearchParams } from "next/navigation"
+import FileDownloadButton from "./FileDownloadButton"
 
 type Inputs = {
   accessCode: string
@@ -24,50 +26,21 @@ export default function SearchFile() {
 
   const router = useRouter()
 
-  const [file, setFile] = useState<string[]>()
   const [fileNames, setFileNames] = useState<string[]>([])
+  const [fileUrl, setFileUrl] = useState<string[]>([])
   const [link, setLink] = useState("")
 
   const setAlert = useSetRecoilState(alertState)
   const setLoading = useSetRecoilState(loadingState)
+  const isDownloading = useRecoilValue(fileDownloadingState)
 
   const params = useSearchParams()
   const paramsCode = params.get("code")?.replace("_", " ")
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setLoading(true)
     const code = data.accessCode.replace(" ", "_")
     router.push(`/?code=${code}`)
-  }
-
-  async function downloadFileFromServer(i: number) {
-    setLoading(true)
-    if (!file) return
-
-    const download = await fetch("api/share/download/url", {
-      method: "POST",
-      body: JSON.stringify({ fileKey: file[i] }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    const signedUrl = await download.json()
-    console.log(signedUrl)
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      const response = await axios.get(signedUrl.downloadUrl, {
-        responseType: "blob",
-      }) // blob으로 응답을 받습니다.
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const a = document.createElement("a")
-      a.href = url
-      a.download = fileNames[i]
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url) // memory 해제
-    } catch (error) {
-      setAlert({ message: "파일 다운로드 실패", warn: false, error: true })
-    }
     setLoading(false)
   }
 
@@ -78,20 +51,30 @@ export default function SearchFile() {
       })
       const shareInfo = await request.json()
       if (shareInfo.share.files.length > 0) {
-        setFile(shareInfo.share.files)
+        const download = await fetch("api/share/download/url", {
+          method: "POST",
+          body: JSON.stringify({ fileKeys: shareInfo.share.files }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        const signedUrl = await download.json()
+
+        setFileUrl(signedUrl.urls)
         setFileNames(shareInfo.share.fileNames)
         setLink("")
       } else if (shareInfo.share.link) {
-        setFile([])
         setFileNames([])
         setLink(shareInfo.share.link)
       }
     }
+    setLoading(true)
     if (paramsCode) {
       setValue("accessCode", paramsCode)
       getFileList()
     }
-  }, [paramsCode, setAlert, setValue])
+    setLoading(false)
+  }, [paramsCode, setAlert, setLoading, setValue])
 
   return (
     <div className='flex w-full flex-col rounded-lg bg-white p-2 shadow-lg '>
@@ -124,6 +107,15 @@ export default function SearchFile() {
       {fileNames.length > 0 && (
         <section className='mt-4 w-full'>
           <div className='text-xl font-semibold'>파일 다운로드</div>
+          <div className={`${isDownloading ? "" : "hidden"} flex p-2`}>
+            <div className='flex text-sm'>
+              <span>
+                <ExclamationCircleIcon className='h-6 w-6 px-1 text-red-600' />
+              </span>
+              대용량 파일의 경우 다운로드에 시간이 걸릴 수 있습니다. 다운로드가
+              되지 않는다면 창을 닫지 말고 기다려주세요.
+            </div>
+          </div>
           <div className='mt-2 flex w-full flex-col space-y-2'>
             {fileNames.map((data, key) => (
               <section
@@ -131,14 +123,10 @@ export default function SearchFile() {
                 className='flex w-full items-center justify-between border-t-2 p-2'
               >
                 <div className='text-sm'>{data}</div>
-
-                <button
-                  className='rounded-md bg-green-500 p-1 px-2 text-sm font-semibold text-white transition duration-150 hover:bg-green-600'
-                  type='button'
-                  onClick={() => downloadFileFromServer(key)}
-                >
-                  다운로드
-                </button>
+                <FileDownloadButton
+                  url={fileUrl[key]}
+                  filename={fileNames[key]}
+                />
               </section>
             ))}
           </div>

@@ -4,7 +4,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 export async function POST(request: Request) {
   const requestData = await request.json()
-  const { fileKey } = requestData
+  const { fileKeys } = requestData
 
   const S3 = new S3Client({
     region: "auto",
@@ -14,11 +14,15 @@ export async function POST(request: Request) {
       secretAccessKey: process.env.R2_PRIVITEKEY!,
     },
   })
-  const presignedUrl = await getSignedUrl(
-    S3,
-    new GetObjectCommand({ Bucket: "moveto-bucket", Key: fileKey }),
-    { expiresIn: 3600 }
-  )
+  const signedUrls: string[] = []
+  for (let i = 0; i < fileKeys.length; i += 1) {
+    const presignedUrl = await getSignedUrl(
+      S3,
+      new GetObjectCommand({ Bucket: "moveto-bucket", Key: fileKeys[i] }),
+      { expiresIn: 3600 }
+    )
+    signedUrls.push(presignedUrl)
+  }
 
-  return NextResponse.json({ downloadUrl: presignedUrl })
+  return NextResponse.json({ urls: signedUrls })
 }

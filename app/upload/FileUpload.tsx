@@ -9,6 +9,7 @@ import { accessCode, alertState } from "@/lib/recoil"
 import { useSession } from "next-auth/react"
 import Progress from "./Progress"
 
+/** 파일 데이터 타입 */
 interface FileData {
   name: string
   size: number
@@ -17,25 +18,39 @@ interface FileData {
 }
 
 export default function FileUpload() {
+  /** 파일 input 태그 숨기고 버튼으로 파일 입력 받을 수 있도록 Ref 설정 */
   const fileInput = useRef<HTMLInputElement>(null)
 
-  const [progress, setProgress] = useState<number>(0)
+  // Progress Event 발생할 때 마다 로드율과 index 저장
+  const [progressData, setProgressData] = useState<{
+    value: number
+    index: number
+  }>()
+  // Progress 태그에 사용되는 value 값 저장
+  const [progress, setProgress] = useState<number[]>([])
+  // 다운로드 후 메세지 표시
   const [downloadMessage, setDownloadMessage] = useState("")
+  // 최대 업로드 크기 제한
   const [maxFileSize, setMaxFileSize] = useState(1024 * 1024 * 1024) // 1GB
+  // 전체 파일 사이즈 저장
   const [totalFileSize, setTotalFileSize] = useState(0)
+  // 입력 받은 파일 데이터 저장
+  const [fileData, setFileData] = useState<FileData[]>([])
 
+  /** 알림 표시 Recoil 함수 */
   const setAlert = useSetRecoilState(alertState)
-
+  /** 접근 코드 표시 Recoil 함수 */
   const setAccessCode = useSetRecoilState(accessCode)
 
-  const { data: session, status } = useSession()
+  // 사용자 로그인 정보 확인
+  const { data: session } = useSession()
 
+  /** 버튼 눌렀을 때 input 태그에서 파일 받는 함수 */
   function inputButton() {
     fileInput.current?.click()
   }
 
-  const [fileData, setFileData] = useState<FileData[]>([])
-
+  /** 받은 파일 값 변경 시 fileData에 값 저장 */
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setDownloadMessage("")
     const files = Array.from(event.target.files ?? [])
@@ -48,6 +63,7 @@ export default function FileUpload() {
     setFileData((prevFiles) => [...prevFiles, ...newFileData])
   }
 
+  /** 받은 파일 중 삭제 */
   const handleFileDelete = (index: number) => {
     setFileData((prevFiles) => {
       const updatedFiles = [...prevFiles]
@@ -76,8 +92,14 @@ export default function FileUpload() {
     }
   }
 
+  /** 받은 파일 전체 크기 계산후 반환 */
+  function getTotalFileSize() {
+    return fileData.reduce((acc, file) => acc + file.size, 0)
+  }
+
+  /** 파일 전체 크기가 업로드 크기 제한에 걸리는지 확인하는 함수 */
   const checkTotalFileSize = () => {
-    const totalSize = fileData.reduce((acc, file) => acc + file.size, 0)
+    const totalSize = getTotalFileSize()
 
     if (totalSize > maxFileSize) {
       if (session?.user) {
@@ -101,45 +123,23 @@ export default function FileUpload() {
     return true
   }
 
+  /** 파일 업로드 함수 */
   async function handleUpload() {
+    // 파일 데이터가 존재한지 확인
     if (fileData.length === 0) return
     if (!fileInput?.current) return
     if (!fileInput.current.files) return
-
     if (!checkTotalFileSize()) return
 
-    function checkProgress(e: ProgressEvent) {
-      if (e.loaded === e.total) {
-        setProgress(99)
-        return
-      }
-      setProgress(Math.floor((e.loaded / e.total) * 100))
-    }
-
-    async function checkSuccess() {}
-
-    function checkError() {
-      setProgress(0)
-      setDownloadMessage("")
-      setAlert({
-        message: "업로드를 다시 시도해주세요.",
-        error: true,
-        warn: false,
-      })
-      if (!fileInput.current) return
-      fileInput.current.value = ""
-    }
-
-    function checkAbort() {
-      setProgress(0)
-      setAlert({ message: "업로드 중단됨", error: false, warn: true })
-    }
+    /** 업로드 완료 후 접근 코드 표시용 값 */
+    let success = 0
 
     // start
     const fileInfo = {
       files: fileData,
     }
 
+    /** 파일 업로드 하기 위한 Pre-Signed URL 받아오는 요청 */
     const requestUrl = await fetch("/api/share/upload/url", {
       method: "POST",
       body: JSON.stringify(fileInfo),
@@ -150,46 +150,69 @@ export default function FileUpload() {
 
     const uploadUrl = await requestUrl.json()
 
+    // 파일 개수 만큼 progress 값 안에 기본값 0 생성
+    const copied = [...progress]
     for (let i = 0; i < uploadUrl.urlList.length; i += 1) {
-      try {
-        const response = await fetch(uploadUrl.urlList[i].uploadUrl, {
+      copied.push(0)
+    }
+    setProgress(copied)
+
+    /** Progress 이벤트가 발생할 때 마다 실행하는 함수 */
+    function checkProgress(e: ProgressEvent, i: number) {
+      setProgressData({
+        value: Math.round((e.loaded / e.total) * 100),
+        index: i,
+      })
+    }
+
+    async function checkSuccess() {
+      success += 1
+
+      if (success === uploadUrl.urlList.length) {
+        setDownloadMessage("업로드 완료")
+
+        const requestCode = await fetch("/api/share/upload/access-code", {
           method: "PUT",
+          body: JSON.stringify({ shareId: uploadUrl.share.id }),
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
-          body: fileInput.current.files[i],
         })
-
-        if (!response.ok) {
-          throw new Error("파일 업로드 실패")
-        }
-
-        // 여기서 성공적으로 업로드된 파일에 대한 추가 작업을 수행할 수 있습니다.
-        // 예: 성공적으로 업로드된 파일의 정보를 서버에 저장하거나 다른 처리를 위해 사용
-
-        setProgress(Math.floor(((i + 1) / uploadUrl.urlList.length) * 100))
-      } catch (error) {
-        console.error("파일 업로드 오류:", error)
-        checkError()
-        return
+        const codeData = await requestCode.json()
+        setFileData([])
+        setProgress([])
+        setDownloadMessage("")
+        setAccessCode(codeData.result.accessCode)
+        if (fileInput.current) fileInput.current.value = ""
       }
     }
 
-    setProgress(100)
-    setDownloadMessage("업로드 완료")
-    setFileData([])
+    function checkError() {
+      setProgress([])
+      setDownloadMessage("")
+      setAlert({
+        message: "업로드를 다시 시도해주세요.",
+        error: true,
+        warn: false,
+      })
+      if (fileInput.current) fileInput.current.value = ""
+    }
 
-    const requestCode = await fetch("/api/share/upload/access-code", {
-      method: "PUT",
-      body: JSON.stringify({ shareId: uploadUrl.share.id }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    const codeData = await requestCode.json()
-    setProgress(0)
-    setDownloadMessage("")
-    setAccessCode(codeData.result.accessCode)
+    function checkAbort() {
+      setProgress([])
+      setAlert({ message: "업로드 중단됨", error: false, warn: true })
+      if (fileInput.current) fileInput.current.value = ""
+    }
+
+    for (let i = 0; i < uploadUrl.urlList.length; i += 1) {
+      const xhr = new XMLHttpRequest()
+      xhr.upload.addEventListener("progress", (e) => checkProgress(e, i), false)
+      xhr.addEventListener("load", checkSuccess, false)
+      xhr.addEventListener("error", checkError, false)
+      xhr.addEventListener("abort", checkAbort, false)
+      xhr.open("PUT", uploadUrl.urlList[i].uploadUrl, true)
+      xhr.send(fileInput.current.files[i])
+    }
   }
 
   useEffect(() => {
@@ -212,6 +235,17 @@ export default function FileUpload() {
     const totalSize = fileData.reduce((acc, file) => acc + file.size, 0)
     setTotalFileSize(totalSize)
   }, [fileData])
+
+  useEffect(() => {
+    if (typeof progressData?.index === "number") {
+      const copied = [...progress]
+      copied[progressData?.index] = progressData?.value
+      setProgress(copied)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progressData])
+
+  useEffect(() => console.log(progress), [progress])
 
   return (
     <div className='mt-2 flex w-full flex-col'>
@@ -266,7 +300,7 @@ export default function FileUpload() {
           총 {formatBytes(totalFileSize)} / 최대 {formatBytes(maxFileSize)}
         </div>
       </div>
-      {progress ? (
+      {progress.length > 0 ? (
         <Progress progress={progress} message={downloadMessage} />
       ) : (
         ""

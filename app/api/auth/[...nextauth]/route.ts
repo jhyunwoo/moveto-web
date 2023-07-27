@@ -10,6 +10,8 @@ declare module "next-auth" {
       id?: string | null | undefined
       plan?: string | null | undefined
       created?: string | null | undefined
+      name?: string | null | undefined
+      email?: string | null | undefined
     }
   }
   interface User {
