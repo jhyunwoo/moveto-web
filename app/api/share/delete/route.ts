@@ -26,11 +26,11 @@ export async function PUT(request: Request) {
     r2Keys = [...r2Keys, ...shareList[i].files]
     let downloadTime = 5 * 60000
     if (shareList[i]?.user?.plan) {
-      if (shareList[i].user.plan === "Free") {
+      if (shareList[i].user?.plan === "Free") {
         downloadTime = 10 * 60000
-      } else if (shareList[i].user.plan === "Basic") {
+      } else if (shareList[i].user?.plan === "Basic") {
         downloadTime = 30 * 60000
-      } else if (shareList[i].user.plan === "Basic") {
+      } else if (shareList[i].user?.plan === "Basic") {
         downloadTime = 60 * 60000
       }
     }
@@ -57,7 +57,7 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const result = await prisma.$transaction(makeQuery)
+    const result = await prisma.$transaction(makeQuery())
     console.log(result)
   } catch {
     console.log("ERROR")
