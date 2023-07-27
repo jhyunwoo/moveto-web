@@ -245,8 +245,6 @@ export default function FileUpload() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progressData])
 
-  useEffect(() => console.log(progress), [progress])
-
   return (
     <div className='mt-2 flex w-full flex-col'>
       <div className='flex w-full flex-col items-start justify-start '>
