@@ -23,7 +23,7 @@ export async function PUT(request: Request) {
 
   for (let i = 0; i < shareList.length; i += 1) {
     if (!shareList[i]) return
-    r2Keys = [...r2Keys, ...shareList[i].files]
+
     let downloadTime = 5 * 60000
     if (shareList[i]?.user?.plan) {
       if (shareList[i].user?.plan === "Free") {
@@ -38,6 +38,7 @@ export async function PUT(request: Request) {
     const expireTime = new Date(createdDate.getTime() + downloadTime)
     if (expireTime < currentTime) {
       targetList.push(shareList[i])
+      r2Keys = [...r2Keys, ...shareList[i].files]
     }
   }
 
@@ -60,5 +61,5 @@ export async function PUT(request: Request) {
     const result = await prisma.$transaction(makeQuery())
   } catch {}
 
-  return NextResponse.json({ fileKeys: targetList })
+  return NextResponse.json({ fileKeys: r2Keys })
 }
