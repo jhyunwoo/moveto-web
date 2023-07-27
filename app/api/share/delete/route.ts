@@ -22,6 +22,7 @@ export async function PUT(request: Request) {
   let r2Keys: string[] = []
 
   for (let i = 0; i < shareList.length; i += 1) {
+    if (!shareList[i]) return
     r2Keys = [...r2Keys, ...shareList[i].files]
     let downloadTime = 5 * 60000
     if (shareList[i]?.user?.plan) {
