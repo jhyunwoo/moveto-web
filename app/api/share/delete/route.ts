@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-export async function GET(request: Request) {
+export async function PUT(request: Request) {
   const requestData = await request.json()
   const { id, password } = requestData
   if (id !== process.env.DELETE_ID || password !== process.env.DELETE_PASSWORD)
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   for (let i = 0; i < shareList.length; i += 1) {
     r2Keys = [...r2Keys, ...shareList[i].files]
     let downloadTime = 5 * 60000
-    if (shareList[i].user) {
+    if (shareList[i]?.user?.plan) {
       if (shareList[i].user.plan === "Free") {
         downloadTime = 10 * 60000
       } else if (shareList[i].user.plan === "Basic") {
