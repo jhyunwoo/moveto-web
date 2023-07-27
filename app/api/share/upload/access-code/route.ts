@@ -28,12 +28,15 @@ export async function PUT(request: Request) {
       if (checkUnique === null) break
     }
 
+    const currentTime = new Date()
+
     const updateShare = await prisma.shares.update({
       where: {
         id: shareId,
       },
       data: {
         accessCode: randomSentence,
+        updated: currentTime,
       },
     })
 

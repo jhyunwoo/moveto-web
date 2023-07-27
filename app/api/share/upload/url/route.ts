@@ -48,7 +48,6 @@ export async function POST(request: Request) {
       uploadUrl: signedUrl,
     })
   }
-  console.log(uploadUrl)
   const session = await getServerSession(authOptions)
   let createShare
   if (session?.user?.id) {

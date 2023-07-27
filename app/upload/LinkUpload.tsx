@@ -1,9 +1,8 @@
 "use client"
 
 import { useForm, SubmitHandler } from "react-hook-form"
-import axios from "axios"
 import { useSetRecoilState } from "recoil"
-import { accessCode } from "@/lib/recoil"
+import { accessCode, loadingState } from "@/lib/recoil"
 
 type Inputs = {
   link: string
@@ -17,13 +16,28 @@ export default function LinkUpload() {
   } = useForm<Inputs>({ mode: "onBlur" })
 
   const setAccessCode = useSetRecoilState(accessCode)
+  const setLoading = useSetRecoilState(loadingState)
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    //링크 공유 생성
-    // const requestAccessCode = await axios.post("/api/generateAccessCode", {
-    //   fileId: createLink.id,
-    // })
-    // setAccessCode(requestAccessCode.data.random)
+    setLoading(true)
+    const createShare = await fetch("/api/share/upload/link", {
+      method: "POST",
+      body: JSON.stringify({ link: data.link }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    const shareInfo = await createShare.json()
+    const requestCode = await fetch("/api/share/upload/access-code", {
+      method: "PUT",
+      body: JSON.stringify({ shareId: shareInfo.result.id }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    const createCode = await requestCode.json()
+    setAccessCode(createCode.result.accessCode)
+    setLoading(false)
   }
 
   return (

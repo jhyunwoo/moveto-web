@@ -73,5 +73,6 @@ model shares {
   files      String[]
   link       String?
   accessCode String?  @unique
+  updated    DateTime @default(now())
   created    DateTime @default(now())
 }

@@ -6,18 +6,12 @@ import { useEffect, useState } from "react"
 import { nanoid } from "nanoid"
 import axios from "axios"
 import { useSetRecoilState } from "recoil"
-import { alertState } from "@/lib/recoil"
+import { alertState, loadingState } from "@/lib/recoil"
 import stringToArray from "@/lib/stringToArray"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 type Inputs = {
   accessCode: string
-}
-
-type FileInfo = {
-  id: string
-  fileNames: string
-  files: any[]
 }
 
 export default function SearchFile() {
@@ -28,42 +22,41 @@ export default function SearchFile() {
     formState: { errors },
   } = useForm<Inputs>()
 
-  const [file, setFile] = useState<FileInfo>()
+  const router = useRouter()
+
+  const [file, setFile] = useState<string[]>()
   const [fileNames, setFileNames] = useState<string[]>([])
   const [link, setLink] = useState("")
 
   const setAlert = useSetRecoilState(alertState)
+  const setLoading = useSetRecoilState(loadingState)
+
   const params = useSearchParams()
   const paramsCode = params.get("code")?.replace("_", " ")
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // try {
-    //   const fileInfo // 접근 코드를 찾고 파일 URL을 가져옴
-    //   if (fileInfo.files.length > 0) {
-    //     setFile({
-    //       id: fileInfo.id,
-    //       fileNames: fileInfo.fileNames,
-    //       files: fileInfo.files,
-    //     })
-    //     setFileNames(stringToArray(fileInfo.fileNames))
-    //   } else {
-    //     setLink(fileInfo.link)
-    //   }
-    // } catch {
-    //   setAlert({ message: "접근 코드 오류", warn: false, error: true })
-    // }
+    const code = data.accessCode.replace(" ", "_")
+    router.push(`/?code=${code}`)
   }
 
   async function downloadFileFromServer(i: number) {
-    // eslint-disable-next-line no-restricted-syntax
-    if (typeof file === undefined) return
-    if (typeof file?.id !== "string") return
+    setLoading(true)
+    if (!file) return
 
-    const serverUrl = `https://api.moveto.kr/api/files/files/${file?.id}/${file?.files[i]}` // 서버의 파일 다운로드 API 엔드포인트
-
+    const download = await fetch("api/share/download/url", {
+      method: "POST",
+      body: JSON.stringify({ fileKey: file[i] }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    const signedUrl = await download.json()
+    console.log(signedUrl)
     try {
       // eslint-disable-next-line no-await-in-loop
-      const response = await axios.get(serverUrl, { responseType: "blob" }) // blob으로 응답을 받습니다.
+      const response = await axios.get(signedUrl.downloadUrl, {
+        responseType: "blob",
+      }) // blob으로 응답을 받습니다.
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const a = document.createElement("a")
       a.href = url
@@ -75,31 +68,27 @@ export default function SearchFile() {
     } catch (error) {
       setAlert({ message: "파일 다운로드 실패", warn: false, error: true })
     }
+    setLoading(false)
   }
 
   useEffect(() => {
     async function getFileList() {
-      // try {
-      //   const fileInfo = await pb
-      //     .collection("files")
-      //     .getFirstListItem(`accessCode="${paramsCode}"`)
-      //   if (fileInfo.files.length > 0) {
-      //     setFile({
-      //       id: fileInfo.id,
-      //       fileNames: fileInfo.fileNames,
-      //       files: fileInfo.files,
-      //     })
-      //     setFileNames(stringToArray(fileInfo.fileNames))
-      //   } else {
-      //     setLink(fileInfo.link)
-      //   }
-      // } catch {
-      //   setAlert({ message: "접근 코드 오류", warn: false, error: true })
-      // }
+      const request = await fetch(`/api/share/download?code=${paramsCode}`, {
+        method: "GET",
+      })
+      const shareInfo = await request.json()
+      if (shareInfo.share.files.length > 0) {
+        setFile(shareInfo.share.files)
+        setFileNames(shareInfo.share.fileNames)
+        setLink("")
+      } else if (shareInfo.share.link) {
+        setFile([])
+        setFileNames([])
+        setLink(shareInfo.share.link)
+      }
     }
     if (paramsCode) {
       setValue("accessCode", paramsCode)
-
       getFileList()
     }
   }, [paramsCode, setAlert, setValue])

@@ -3,7 +3,6 @@
 import formatBytes from "@/lib/formatBytes"
 import React, { useRef, useState, ChangeEvent, useEffect } from "react"
 import { nanoid } from "nanoid"
-import axios from "axios"
 import { TrashIcon } from "@heroicons/react/24/outline"
 import { useSetRecoilState } from "recoil"
 import { accessCode, alertState } from "@/lib/recoil"
@@ -109,11 +108,39 @@ export default function FileUpload() {
 
     if (!checkTotalFileSize()) return
 
+    function checkProgress(e: ProgressEvent) {
+      if (e.loaded === e.total) {
+        setProgress(99)
+        return
+      }
+      setProgress(Math.floor((e.loaded / e.total) * 100))
+    }
+
+    async function checkSuccess() {}
+
+    function checkError() {
+      setProgress(0)
+      setDownloadMessage("")
+      setAlert({
+        message: "업로드를 다시 시도해주세요.",
+        error: true,
+        warn: false,
+      })
+      if (!fileInput.current) return
+      fileInput.current.value = ""
+    }
+
+    function checkAbort() {
+      setProgress(0)
+      setAlert({ message: "업로드 중단됨", error: false, warn: true })
+    }
+
+    // start
     const fileInfo = {
       files: fileData,
     }
 
-    const requestUrl = await fetch("/api/share/upload/get-upload-url", {
+    const requestUrl = await fetch("/api/share/upload/url", {
       method: "POST",
       body: JSON.stringify(fileInfo),
       headers: {
@@ -123,29 +150,46 @@ export default function FileUpload() {
 
     const uploadUrl = await requestUrl.json()
 
-    console.log(uploadUrl)
-
     for (let i = 0; i < uploadUrl.urlList.length; i += 1) {
-      console.log(uploadUrl.urlList[i])
-      const result = await fetch(uploadUrl.urlList[i].uploadUrl, {
-        headers: { "Content-Type": "multipart/form-data" },
-        method: "PUT",
-        body: fileInput.current.files[i],
-      })
-      console.log(result)
+      try {
+        const response = await fetch(uploadUrl.urlList[i].uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: fileInput.current.files[i],
+        })
+
+        if (!response.ok) {
+          throw new Error("파일 업로드 실패")
+        }
+
+        // 여기서 성공적으로 업로드된 파일에 대한 추가 작업을 수행할 수 있습니다.
+        // 예: 성공적으로 업로드된 파일의 정보를 서버에 저장하거나 다른 처리를 위해 사용
+
+        setProgress(Math.floor(((i + 1) / uploadUrl.urlList.length) * 100))
+      } catch (error) {
+        console.error("파일 업로드 오류:", error)
+        checkError()
+        return
+      }
     }
-    const requestCode = await fetch("/api/share/upload", {
+
+    setProgress(100)
+    setDownloadMessage("업로드 완료")
+    setFileData([])
+
+    const requestCode = await fetch("/api/share/upload/access-code", {
       method: "PUT",
       body: JSON.stringify({ shareId: uploadUrl.share.id }),
       headers: {
         "Content-Type": "application/json",
       },
     })
-    const createCode = await requestCode.json()
-    console.log(createCode)
-    setAlert({ message: "업로드 완료", warn: false, error: false })
-    if (!fileInput.current) return
-    fileInput.current.value = ""
+    const codeData = await requestCode.json()
+    setProgress(0)
+    setDownloadMessage("")
+    setAccessCode(codeData.result.accessCode)
   }
 
   useEffect(() => {
