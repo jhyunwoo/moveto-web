@@ -58,10 +58,7 @@ export async function PUT(request: Request) {
 
   try {
     const result = await prisma.$transaction(makeQuery())
-    console.log(result)
-  } catch {
-    console.log("ERROR")
-  }
+  } catch {}
 
-  return NextResponse.json({ fileKeys: r2Keys })
+  return NextResponse.json({ fileKeys: targetList })
 }
