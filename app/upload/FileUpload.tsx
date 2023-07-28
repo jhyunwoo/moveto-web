@@ -323,7 +323,9 @@ export default function FileUpload() {
         ))}
       </div>
       <div className='my-2 flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2'>
-        <div className='font-semibold'>{session?.user.plan} Plan</div>
+        <div className='font-semibold'>
+          {session?.user.plan ? session.user.plan : "Guest"} Plan
+        </div>
         <div className='ml-auto mt-2 text-sm'>
           {getShareTime(session?.user.plan)} 동안 공유
         </div>
