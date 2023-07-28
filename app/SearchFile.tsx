@@ -138,6 +138,7 @@ export default function SearchFile() {
         <section className='mt-4 w-full'>
           <div className='text-xl font-semibold'>공유된 링크</div>
           <a
+            target='_blank'
             href={link}
             className='text-lg font-semibold text-blue-700 transition duration-100 hover:text-indigo-700 hover:underline'
           >
