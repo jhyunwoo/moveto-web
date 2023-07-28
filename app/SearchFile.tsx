@@ -46,14 +46,15 @@ export default function SearchFile() {
 
   useEffect(() => {
     async function getFileList() {
-      const request = await fetch(`/api/share/download?code=${paramsCode}`, {
+      const request = await fetch(`/api/share?code=${paramsCode}`, {
         method: "GET",
       })
       const shareInfo = await request.json()
+
       if (shareInfo.share.files.length > 0) {
-        const download = await fetch("api/share/download/url", {
+        const download = await fetch("api/share/file/download", {
           method: "POST",
-          body: JSON.stringify({ fileKeys: shareInfo.share.files }),
+          body: JSON.stringify({ files: shareInfo }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -61,7 +62,7 @@ export default function SearchFile() {
         const signedUrl = await download.json()
 
         setFileUrl(signedUrl.urls)
-        setFileNames(shareInfo.share.fileNames)
+        setFileNames(shareInfo.share.files)
         setLink("")
       } else if (shareInfo.share.link) {
         setFileNames([])

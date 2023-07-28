@@ -1,7 +1,21 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-export async function PUT(request: Request) {
+/** get file info from Database */
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const code = searchParams.get("code")
+
+  const accessCode = code?.replace("_", " ")
+
+  const findCode = await prisma.shares.findFirst({
+    where: { accessCode: accessCode },
+  })
+
+  return NextResponse.json({ share: findCode })
+}
+
+export async function DELETE(request: Request) {
   const requestData = await request.json()
   const { id, password } = requestData
   if (id !== process.env.DELETE_ID || password !== process.env.DELETE_PASSWORD)
@@ -19,7 +33,6 @@ export async function PUT(request: Request) {
   })
 
   let targetList: any[] = []
-  let r2Keys: string[] = []
 
   for (let i = 0; i < shareList.length; i += 1) {
     if (!shareList[i]) return
@@ -38,7 +51,6 @@ export async function PUT(request: Request) {
     const expireTime = new Date(createdDate.getTime() + downloadTime)
     if (expireTime < currentTime) {
       targetList.push(shareList[i])
-      r2Keys = [...r2Keys, ...shareList[i].files]
     }
   }
 
@@ -60,6 +72,6 @@ export async function PUT(request: Request) {
   try {
     const result = await prisma.$transaction(makeQuery())
   } catch {}
-
-  return NextResponse.json({ fileKeys: r2Keys })
+  console.log(targetList)
+  return NextResponse.json({ fileKeys: targetList })
 }

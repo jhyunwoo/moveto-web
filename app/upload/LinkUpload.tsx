@@ -20,7 +20,7 @@ export default function LinkUpload() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true)
-    const createShare = await fetch("/api/share/upload/link", {
+    const createShare = await fetch("/api/share/link", {
       method: "POST",
       body: JSON.stringify({ link: data.link }),
       headers: {
@@ -28,7 +28,7 @@ export default function LinkUpload() {
       },
     })
     const shareInfo = await createShare.json()
-    const requestCode = await fetch("/api/share/upload/access-code", {
+    const requestCode = await fetch("/api/share/file/upload", {
       method: "PUT",
       body: JSON.stringify({ shareId: shareInfo.result.id }),
       headers: {

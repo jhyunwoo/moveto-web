@@ -140,7 +140,7 @@ export default function FileUpload() {
     }
 
     /** 파일 업로드 하기 위한 Pre-Signed URL 받아오는 요청 */
-    const requestUrl = await fetch("/api/share/upload/url", {
+    const requestUrl = await fetch("/api/share/file/upload", {
       method: "POST",
       body: JSON.stringify(fileInfo),
       headers: {
@@ -171,7 +171,7 @@ export default function FileUpload() {
       if (success === uploadUrl.urlList.length) {
         setDownloadMessage("업로드 완료")
 
-        const requestCode = await fetch("/api/share/upload/access-code", {
+        const requestCode = await fetch("/api/share/file/upload", {
           method: "PUT",
           body: JSON.stringify({ shareId: uploadUrl.share.id }),
           headers: {
