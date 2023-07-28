@@ -27,6 +27,7 @@ export default async function ShareHistory() {
 
   function korDate(date: Date) {
     const sharedDate = new Date(date)
+    sharedDate.setHours(sharedDate.getHours() + 9)
     const options: { dateStyle: "long"; timeStyle: "medium" } = {
       dateStyle: "long",
       timeStyle: "medium",
