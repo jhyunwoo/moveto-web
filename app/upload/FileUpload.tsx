@@ -166,7 +166,6 @@ export default function FileUpload() {
     })
 
     const shareInfo = await createShare.json()
-    console.log(shareInfo)
 
     // 파일 개수 만큼 progress 값 안에 기본값 0 생성
     const copied = [...progress]

@@ -9,7 +9,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 export async function POST(request: Request) {
   const requestData = await request.json()
   const { fileInfo, shareInfo } = requestData
-  console.log(fileInfo, shareInfo)
 
   const S3 = new S3Client({
     region: "auto",
@@ -29,7 +28,6 @@ export async function POST(request: Request) {
   const uploadUrl: UploadUrlType[] = []
 
   const fileKey = shareInfo.id + "/" + fileInfo.name
-  console.log(fileKey)
 
   const command = new PutObjectCommand({
     Bucket: "moveto-bucket",
