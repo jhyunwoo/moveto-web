@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma"
+import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
+import { authOptions } from "../auth/[...nextauth]/route"
 
 /** get file info from Database */
 export async function GET(request: Request) {
@@ -40,11 +42,11 @@ export async function DELETE(request: Request) {
     let downloadTime = 5 * 60000
     if (shareList[i]?.user?.plan) {
       if (shareList[i].user?.plan === "Free") {
-        downloadTime = 10 * 60000
-      } else if (shareList[i].user?.plan === "Basic") {
-        downloadTime = 30 * 60000
+        downloadTime = 20 * 60000
       } else if (shareList[i].user?.plan === "Basic") {
         downloadTime = 60 * 60000
+      } else if (shareList[i].user?.plan === "Pro") {
+        downloadTime = 120 * 60000
       }
     }
     let createdDate = new Date(shareList[i].updated)
@@ -74,4 +76,35 @@ export async function DELETE(request: Request) {
   } catch {}
   console.log(targetList)
   return NextResponse.json({ fileKeys: targetList })
+}
+
+export async function POST(request: Request) {
+  const requestData = await request.json()
+  const { files } = requestData
+
+  const session = await getServerSession(authOptions)
+
+  const fileList: string[] = []
+  for (let i = 0; i < files.length; i += 1) {
+    fileList.push(files[i].name)
+  }
+
+  let createShare
+  if (session?.user?.id) {
+    createShare = await prisma.shares.create({
+      data: {
+        user: {
+          connect: { id: session.user.id },
+        },
+        files: fileList,
+      },
+    })
+  } else {
+    createShare = await prisma.shares.create({
+      data: {
+        files: fileList,
+      },
+    })
+  }
+  return NextResponse.json(createShare)
 }

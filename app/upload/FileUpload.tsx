@@ -8,6 +8,7 @@ import { useSetRecoilState } from "recoil"
 import { accessCode, alertState } from "@/lib/recoil"
 import { useSession } from "next-auth/react"
 import Progress from "./Progress"
+import getShareTime from "@/lib/getShareTime"
 
 /** 파일 데이터 타입 */
 interface FileData {
@@ -61,6 +62,15 @@ export default function FileUpload() {
       lastModified: file.lastModified,
     }))
     setFileData((prevFiles) => [...prevFiles, ...newFileData])
+    for (let i = 0; i < files.length; i += 1) {
+      if (files[i].size > 5 * 1024 * 1024 * 1024 - 1024 * 1024 * 5) {
+        setAlert({
+          message: "단일 파일 크기가 4.95GiB를 초과합니다.",
+          warn: true,
+          error: false,
+        })
+      }
+    }
   }
 
   /** 받은 파일 중 삭제 */
@@ -95,6 +105,13 @@ export default function FileUpload() {
   /** 받은 파일 전체 크기 계산후 반환 */
   function getTotalFileSize() {
     return fileData.reduce((acc, file) => acc + file.size, 0)
+  }
+
+  function warnMaxFileSize(fileSize: number) {
+    if (fileSize > 5 * 1024 * 1024 * 1024 - 1024 * 1024 * 5) {
+      return true
+    }
+    return false
   }
 
   /** 파일 전체 크기가 업로드 크기 제한에 걸리는지 확인하는 함수 */
@@ -139,8 +156,8 @@ export default function FileUpload() {
       files: fileData,
     }
 
-    /** 파일 업로드 하기 위한 Pre-Signed URL 받아오는 요청 */
-    const requestUrl = await fetch("/api/share/file/upload", {
+    /** 파일 업로드 하기 전 share 정보 저장 */
+    const createShare = await fetch("/api/share", {
       method: "POST",
       body: JSON.stringify(fileInfo),
       headers: {
@@ -148,11 +165,12 @@ export default function FileUpload() {
       },
     })
 
-    const uploadUrl = await requestUrl.json()
+    const shareInfo = await createShare.json()
+    console.log(shareInfo)
 
     // 파일 개수 만큼 progress 값 안에 기본값 0 생성
     const copied = [...progress]
-    for (let i = 0; i < uploadUrl.urlList.length; i += 1) {
+    for (let i = 0; i < shareInfo.files.length; i += 1) {
       copied.push(0)
     }
     setProgress(copied)
@@ -168,12 +186,12 @@ export default function FileUpload() {
     async function checkSuccess() {
       success += 1
 
-      if (success === uploadUrl.urlList.length) {
+      if (success === shareInfo.files.length) {
         setDownloadMessage("업로드 완료")
 
         const requestCode = await fetch("/api/share/file/upload", {
           method: "PUT",
-          body: JSON.stringify({ shareId: uploadUrl.share.id }),
+          body: JSON.stringify({ shareId: shareInfo.id }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -204,13 +222,22 @@ export default function FileUpload() {
       if (fileInput.current) fileInput.current.value = ""
     }
 
-    for (let i = 0; i < uploadUrl.urlList.length; i += 1) {
+    for (let i = 0; i < shareInfo.files.length; i += 1) {
+      const uploadUrl = await fetch("/api/share/file/upload", {
+        method: "POST",
+        body: JSON.stringify({ fileInfo: fileData[i], shareInfo: shareInfo }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const urlInfo = await uploadUrl.json()
+
       const xhr = new XMLHttpRequest()
       xhr.upload.addEventListener("progress", (e) => checkProgress(e, i), false)
       xhr.addEventListener("load", checkSuccess, false)
       xhr.addEventListener("error", checkError, false)
       xhr.addEventListener("abort", checkAbort, false)
-      xhr.open("PUT", uploadUrl.urlList[i].uploadUrl, true)
+      xhr.open("PUT", urlInfo.signedUrl, true)
       xhr.send(fileInput.current.files[i])
     }
   }
@@ -277,7 +304,13 @@ export default function FileUpload() {
           >
             <div className='flex flex-col justify-center text-sm font-semibold'>
               <div className='break-words'>{data.name}</div>
-              <div>({formatBytes(data.size)})</div>
+              <div
+                className={`${
+                  warnMaxFileSize(data.size) ? "text-red-500" : ""
+                }`}
+              >
+                ({formatBytes(data.size)})
+              </div>
             </div>
             <button
               type='button'
@@ -288,14 +321,30 @@ export default function FileUpload() {
             </button>
           </section>
         ))}
+      </div>
+      <div className='my-2 flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2'>
+        <div className='font-semibold'>{session?.user.plan} Plan</div>
+        <div className='ml-auto mt-2 text-sm'>
+          {getShareTime(session?.user.plan)} 동안 공유
+        </div>
         <div
           className={`ml-auto text-sm ${
             totalFileSize > maxFileSize
               ? "font-semibold text-red-500"
-              : "text-green-600"
+              : "text-green-700"
           }`}
         >
           총 {formatBytes(totalFileSize)} / 최대 {formatBytes(maxFileSize)}
+        </div>
+        <div
+          className={`ml-auto text-xs ${
+            totalFileSize > maxFileSize
+              ? "font-semibold text-red-500"
+              : "text-green-700"
+          }`}
+        >
+          단일 파일 최대
+          {formatBytes(5 * 1024 * 1024 * 1024 - 1024 * 1024 * 5)}
         </div>
       </div>
       {progress.length > 0 ? (
@@ -304,13 +353,15 @@ export default function FileUpload() {
         ""
       )}
       {fileData.length > 0 ? (
-        <button
-          type='button'
-          onClick={handleUpload}
-          className='rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700'
-        >
-          파일 업로드
-        </button>
+        <>
+          <button
+            type='button'
+            onClick={handleUpload}
+            className='rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700'
+          >
+            파일 업로드
+          </button>
+        </>
       ) : (
         ""
       )}

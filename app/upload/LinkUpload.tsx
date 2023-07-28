@@ -3,6 +3,8 @@
 import { useForm, SubmitHandler } from "react-hook-form"
 import { useSetRecoilState } from "recoil"
 import { accessCode, loadingState } from "@/lib/recoil"
+import { useSession } from "next-auth/react"
+import getShareTime from "@/lib/getShareTime"
 
 type Inputs = {
   link: string
@@ -14,6 +16,8 @@ export default function LinkUpload() {
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>({ mode: "onBlur" })
+
+  const { data: session } = useSession()
 
   const setAccessCode = useSetRecoilState(accessCode)
   const setLoading = useSetRecoilState(loadingState)
@@ -64,6 +68,10 @@ export default function LinkUpload() {
         >
           공유
         </button>
+        <div className='ml-auto mt-2 text-sm'>
+          {session?.user.plan} Plan: {getShareTime(session?.user.plan)} 동안
+          공유
+        </div>
       </form>
     </div>
   )

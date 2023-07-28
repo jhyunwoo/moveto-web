@@ -20,15 +20,4 @@ const loadingState = atom({
   default: false,
 })
 
-const fileDownloadingState = atom<boolean>({
-  key: "fileDownloadingState",
-  default: false,
-})
-
-export {
-  accessCode,
-  alertState,
-  loadingState,
-  alertWithLinkState,
-  fileDownloadingState,
-}
+export { accessCode, alertState, loadingState, alertWithLinkState }

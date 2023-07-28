@@ -8,32 +8,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 /** get Pre-Signed URL from R2 Bucket */
 export async function POST(request: Request) {
   const requestData = await request.json()
-  const { files } = requestData
-
-  const session = await getServerSession(authOptions)
-
-  const fileList: string[] = []
-  for (let i = 0; i < files.length; i += 1) {
-    fileList.push(files[i].name)
-  }
-
-  let createShare
-  if (session?.user?.id) {
-    createShare = await prisma.shares.create({
-      data: {
-        user: {
-          connect: { id: session.user.id },
-        },
-        files: fileList,
-      },
-    })
-  } else {
-    createShare = await prisma.shares.create({
-      data: {
-        files: fileList,
-      },
-    })
-  }
+  const { fileInfo, shareInfo } = requestData
+  console.log(fileInfo, shareInfo)
 
   const S3 = new S3Client({
     region: "auto",
@@ -52,26 +28,18 @@ export async function POST(request: Request) {
 
   const uploadUrl: UploadUrlType[] = []
 
-  for (let i = 0; i < files.length; i += 1) {
-    const fileKey = createShare.id + "/" + files[i].name
-    console.log(fileKey)
+  const fileKey = shareInfo.id + "/" + fileInfo.name
+  console.log(fileKey)
 
-    const command = new PutObjectCommand({
-      Bucket: "moveto-bucket",
-      Key: fileKey,
-      ContentType: files[i].type,
-    })
+  const command = new PutObjectCommand({
+    Bucket: "moveto-bucket",
+    Key: fileKey,
+    ContentType: fileInfo.type,
+  })
 
-    const signedUrl = await getSignedUrl(S3, command, { expiresIn: 3600 })
+  const signedUrl = await getSignedUrl(S3, command, { expiresIn: 3600 })
 
-    uploadUrl.push({
-      fileName: files[i].name,
-      key: fileKey,
-      uploadUrl: signedUrl,
-    })
-  }
-
-  return NextResponse.json({ urlList: uploadUrl, share: createShare })
+  return NextResponse.json({ signedUrl })
 }
 
 /** get access code after upload file */

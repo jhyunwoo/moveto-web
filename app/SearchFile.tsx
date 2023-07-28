@@ -1,14 +1,11 @@
 "use client"
 
-import {
-  ExclamationCircleIcon,
-  MagnifyingGlassCircleIcon,
-} from "@heroicons/react/24/outline"
+import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { useEffect, useState } from "react"
 import { nanoid } from "nanoid"
-import { useRecoilValue, useSetRecoilState } from "recoil"
-import { alertState, fileDownloadingState, loadingState } from "@/lib/recoil"
+import { useSetRecoilState } from "recoil"
+import { alertState, loadingState } from "@/lib/recoil"
 import { useRouter, useSearchParams } from "next/navigation"
 import FileDownloadButton from "./FileDownloadButton"
 
@@ -32,24 +29,26 @@ export default function SearchFile() {
 
   const setAlert = useSetRecoilState(alertState)
   const setLoading = useSetRecoilState(loadingState)
-  const isDownloading = useRecoilValue(fileDownloadingState)
 
   const params = useSearchParams()
   const paramsCode = params.get("code")?.replace("_", " ")
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    setLoading(true)
-    const code = data.accessCode.replace(" ", "_")
-    router.push(`/?code=${code}`)
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    async function getFileList() {
+    if (paramsCode === data.accessCode) {
+      setLoading(true)
       const request = await fetch(`/api/share?code=${paramsCode}`, {
         method: "GET",
       })
       const shareInfo = await request.json()
+      if (!shareInfo.share) {
+        setLoading(false)
+        setAlert({
+          message: "접근 코드가 올바르지 않습니다.",
+          warn: true,
+          error: false,
+        })
+        return
+      }
 
       if (shareInfo.share.files.length > 0) {
         const download = await fetch("api/share/file/download", {
@@ -68,13 +67,56 @@ export default function SearchFile() {
         setFileNames([])
         setLink(shareInfo.share.link)
       }
+      setLoading(false)
+    } else {
+      setLoading(true)
+      const code = data.accessCode.replace(" ", "_")
+      router.push(`/?code=${code}`)
+      setLoading(false)
     }
-    setLoading(true)
+  }
+
+  useEffect(() => {
+    async function getFileList() {
+      setLoading(true)
+      const request = await fetch(`/api/share?code=${paramsCode}`, {
+        method: "GET",
+      })
+      const shareInfo = await request.json()
+      if (!shareInfo.share) {
+        setLoading(false)
+        setAlert({
+          message: "접근 코드가 올바르지 않습니다.",
+          warn: true,
+          error: false,
+        })
+        return
+      }
+
+      if (shareInfo.share.files.length > 0) {
+        const download = await fetch("api/share/file/download", {
+          method: "POST",
+          body: JSON.stringify({ files: shareInfo }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        const signedUrl = await download.json()
+
+        setFileUrl(signedUrl.urls)
+        setFileNames(shareInfo.share.files)
+        setLink("")
+      } else if (shareInfo.share.link) {
+        setFileNames([])
+        setLink(shareInfo.share.link)
+      }
+      setLoading(false)
+    }
+
     if (paramsCode) {
       setValue("accessCode", paramsCode)
       getFileList()
     }
-    setLoading(false)
   }, [paramsCode, setAlert, setLoading, setValue])
 
   return (
@@ -108,22 +150,14 @@ export default function SearchFile() {
       {fileNames.length > 0 && (
         <section className='mt-4 w-full'>
           <div className='text-xl font-semibold'>파일 다운로드</div>
-          <div className={`${isDownloading ? "" : "hidden"} flex p-2`}>
-            <div className='flex text-sm'>
-              <span>
-                <ExclamationCircleIcon className='h-6 w-6 px-1 text-red-600' />
-              </span>
-              대용량 파일의 경우 다운로드에 시간이 걸릴 수 있습니다. 다운로드가
-              되지 않는다면 창을 닫지 말고 기다려주세요.
-            </div>
-          </div>
+
           <div className='mt-2 flex w-full flex-col space-y-2'>
             {fileNames.map((data, key) => (
               <section
                 key={nanoid()}
                 className='flex w-full items-center justify-between border-t-2 p-2'
               >
-                <div className='text-sm'>{data}</div>
+                <div className='basis-5/6 break-words text-sm'>{data}</div>
                 <FileDownloadButton
                   url={fileUrl[key]}
                   filename={fileNames[key]}

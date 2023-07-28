@@ -1,6 +1,10 @@
-import { alertState, fileDownloadingState } from "@/lib/recoil"
-import React from "react"
-import { useRecoilState, useSetRecoilState } from "recoil"
+"use client"
+
+import { alertState } from "@/lib/recoil"
+import { ArchiveBoxArrowDownIcon } from "@heroicons/react/24/outline"
+import axios from "axios"
+import React, { useState } from "react"
+import { useSetRecoilState } from "recoil"
 
 const FileDownloadButton = ({
   url,
@@ -10,28 +14,30 @@ const FileDownloadButton = ({
   filename: string
 }) => {
   const setAlert = useSetRecoilState(alertState)
-  const setIsDownloading = useSetRecoilState(fileDownloadingState)
-  const handleDownloadClick = () => {
-    setIsDownloading(true)
-    fetch(url, {
+
+  const [progress, setProgress] = useState(-1)
+
+  const handleDownloadClick = async () => {
+    setProgress(0)
+    await axios({
+      url: url,
       method: "GET",
+      responseType: "blob", // important
+      onDownloadProgress: (progressEvent) => {
+        if (!progressEvent.total) return
+        let percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        ) // you can use this to show user percentage of file downloaded
+        setProgress(percentCompleted)
+      },
     })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok")
-        }
-        return response.blob()
-      })
-      .then((blob) => {
-        // 파일 다운로드
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = filename // 파일 이름 설정
-        a.style.display = "none" // 링크를 표시하지 않도록 설정
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement("a")
+        link.href = url
+        link.setAttribute("download", filename) //or any other extension
+        document.body.appendChild(link)
+        link.click()
       })
       .catch(() => {
         setAlert({ message: "파일 다운로드 실패", warn: false, error: true })
@@ -39,13 +45,26 @@ const FileDownloadButton = ({
   }
 
   return (
-    <button
-      onClick={handleDownloadClick}
-      className='rounded-md bg-green-500 p-1 px-2 text-sm font-semibold text-white transition duration-150 hover:bg-green-600'
-      type='button'
-    >
-      다운로드
-    </button>
+    <>
+      {progress === -1 ? (
+        <button
+          onClick={handleDownloadClick}
+          className='flex basis-1/6 items-center justify-center rounded-md bg-green-500 p-1 px-2 text-sm font-semibold text-white transition duration-150 hover:bg-green-600'
+          type='button'
+        >
+          <ArchiveBoxArrowDownIcon className='h-6 w-6' />
+        </button>
+      ) : (
+        <div className='flex basis-1/6 flex-col'>
+          <progress
+            max='100'
+            value={progress}
+            className='w-full [&::-moz-progress-bar]:bg-green-400 [&::-webkit-progress-bar]:rounded-full   [&::-webkit-progress-bar]:bg-slate-200 [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-value]:bg-green-400'
+          />
+          <div className='ml-auto text-xs'>{progress}%</div>
+        </div>
+      )}
+    </>
   )
 }
 

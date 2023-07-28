@@ -6,7 +6,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 export async function POST(request: Request) {
   const requestData = await request.json()
   const { files } = requestData
-  console.log(files)
 
   const S3 = new S3Client({
     region: "auto",
