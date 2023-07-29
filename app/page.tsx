@@ -1,12 +1,39 @@
 import BottomBar from "@/components/BottomBar"
-import { Metadata } from "next"
+import { Metadata, ResolvingMetadata } from "next"
 import SearchFile from "./SearchFile"
 
 export const runtime = "edge"
 
-export const metadata: Metadata = {
-  title: "모베토",
-  description: "쉽고 빠른 파일 전송",
+type Props = {
+  searchParams: { [key: string]: string | undefined }
+}
+
+export async function generateMetadata(
+  { searchParams }: Props,
+  parent?: ResolvingMetadata
+): Promise<Metadata> {
+  let { code } = searchParams
+
+  if (code) {
+    code = " | " + code.replace("_", " ")
+  }
+  if (code === undefined) {
+    code = ""
+  }
+
+  function ogImage() {
+    if (code) {
+      return [`/api/og/image/${code}`]
+    }
+    return ["/images/moveto-og.png"]
+  }
+
+  return {
+    title: "모베토" + code,
+    openGraph: {
+      images: ogImage(),
+    },
+  }
 }
 
 export default function Home() {

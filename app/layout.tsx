@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "모베토",
     description: "쉽고 빠른 파일 공유",
+    images: "/images/moveto-og.png",
+    type: "website",
+    url: "https://www.moveto.kr",
+    siteName: "모베토",
+    locale: "ko_KR",
   },
   manifest: "/manifest.json",
   themeColor: "#ffffff",
