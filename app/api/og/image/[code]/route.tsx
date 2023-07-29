@@ -1,8 +1,5 @@
 import { ImageResponse } from "next/server"
 
-export const size = { width: 1200, height: 630 }
-export const alt = "모베토"
-export const contentType = "image/svg"
 export const runtime = "edge"
 
 export async function GET(request: Request) {
@@ -94,6 +91,10 @@ export async function GET(request: Request) {
           </div>
         </div>
       </div>
-    )
+    ),
+    {
+      width: 1200,
+      height: 630,
+    }
   )
 }
