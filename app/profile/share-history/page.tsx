@@ -7,8 +7,6 @@ import { getServerSession } from "next-auth"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
-export const runtime = "edge"
-
 export const revalidate = 0
 
 export default async function ShareHistory() {

@@ -6,8 +6,6 @@ import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import SignOut from "./SignOut"
 
-export const runtime = "edge"
-
 export const metadata: Metadata = {
   title: "모베토 | 프로필",
   description: "쉽고 빠른 파일 전송",
