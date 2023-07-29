@@ -1,3 +1,4 @@
+import replaceAll from "@/lib/replaceAll"
 import { ImageResponse } from "next/server"
 
 export const runtime = "edge"
@@ -5,9 +6,10 @@ export const runtime = "edge"
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
 
-  // ?title=<title>
-  const hasTitle = searchParams.has("code")
-  const title = hasTitle ? searchParams.get("code") : "My default title"
+  let title = searchParams.get("code") ? searchParams.get("code") : ""
+
+  title = unescape(replaceAll(title!, "\\", "%"))
+
   return new ImageResponse(
     (
       <div tw=' h-full w-full flex flex-col justify-center items-center bg-white'>

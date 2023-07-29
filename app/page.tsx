@@ -1,6 +1,7 @@
 import BottomBar from "@/components/BottomBar"
 import { Metadata } from "next"
 import SearchFile from "./SearchFile"
+import replaceAll from "@/lib/replaceAll"
 
 export const runtime = "edge"
 
@@ -14,7 +15,7 @@ export async function generateMetadata({
   let { code } = searchParams
 
   if (code) {
-    code = " | " + code.replace("_", " ")
+    code = code.replace("_", " ")
   }
   if (code === undefined) {
     code = ""
@@ -22,13 +23,13 @@ export async function generateMetadata({
 
   function ogImage() {
     if (code) {
-      return [`/api/og/image/${code}`]
+      return [`/api/og/image?code=${escape(replaceAll(code, "\\", "%"))}`]
     }
     return ["/images/moveto-og.png"]
   }
 
   return {
-    title: "모베토" + code,
+    title: "모베토" + (code ? " | " + code : ""),
     openGraph: {
       images: ogImage(),
     },
