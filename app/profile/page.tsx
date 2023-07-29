@@ -6,6 +6,8 @@ import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import SignOut from "./SignOut"
 
+export const runtime = "edge"
+
 export const metadata: Metadata = {
   title: "모베토 | 프로필",
   description: "쉽고 빠른 파일 전송",
@@ -101,7 +103,7 @@ export default async function User() {
       </div>
       <Link
         href={"/privacy"}
-        className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg  hover:shadow-xl '
+        className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg  transition duration-200 hover:shadow-xl'
       >
         <div className='text-sm font-semibold'>개인정보 처리 방침</div>
       </Link>

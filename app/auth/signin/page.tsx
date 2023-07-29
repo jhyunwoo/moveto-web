@@ -6,6 +6,8 @@ import SignInButton from "./SignInButton"
 import Link from "next/link"
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline"
 
+export const runtime = "edge"
+
 export default async function SignIn() {
   const session = await getServerSession(authOptions)
   if (session) redirect("/profile")

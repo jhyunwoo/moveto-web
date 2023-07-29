@@ -7,6 +7,8 @@ import { getServerSession } from "next-auth"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
+export const runtime = "edge"
+
 export const revalidate = 0
 
 export default async function ShareHistory() {
@@ -36,7 +38,7 @@ export default async function ShareHistory() {
   }
 
   return (
-    <div className='flex min-h-screen w-full flex-col space-y-2  p-4'>
+    <div className='flex min-h-screen w-full flex-col space-y-2  p-4 pb-24'>
       <Link
         href={"/profile"}
         className='flex items-center space-x-1 text-green-600 transition duration-200 hover:text-green-700'
