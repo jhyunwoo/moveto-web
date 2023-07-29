@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       new GetObjectCommand({
         Bucket: "moveto-bucket",
         Key: files.share.id + "/" + files.share.files[i],
+        ResponseContentDisposition: `attachment; filename="${files.share.files[i]}"`,
       }),
       { expiresIn: 3600 }
     )

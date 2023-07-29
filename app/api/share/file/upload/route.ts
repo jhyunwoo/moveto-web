@@ -17,14 +17,6 @@ export async function POST(request: Request) {
     },
   })
 
-  type UploadUrlType = {
-    fileName: string
-    key: string
-    uploadUrl: string
-  }
-
-  const uploadUrl: UploadUrlType[] = []
-
   const fileKey = shareInfo.id + "/" + fileInfo.name
 
   const command = new PutObjectCommand({
