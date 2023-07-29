@@ -85,7 +85,7 @@ export default async function ShareHistory() {
             <div className='text-sm'>{korDate(data.updated)}</div>
             {data.accessCode ? (
               <Link
-                href={`/?code=${data.accessCode}`}
+                href={`/?code=${data.accessCode.replace(" ", "_")}`}
                 className='ml-auto rounded-md bg-green-700 p-1 px-2 font-semibold text-white transition duration-200 hover:bg-green-600 hover:shadow-md'
               >
                 {data.accessCode}
