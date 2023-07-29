@@ -1,5 +1,5 @@
 import BottomBar from "@/components/BottomBar"
-import { Metadata, ResolvingMetadata } from "next"
+import { Metadata } from "next"
 import SearchFile from "./SearchFile"
 
 export const runtime = "edge"
@@ -8,10 +8,9 @@ type Props = {
   searchParams: { [key: string]: string | undefined }
 }
 
-export async function generateMetadata(
-  { searchParams }: Props,
-  parent?: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
   let { code } = searchParams
 
   if (code) {
