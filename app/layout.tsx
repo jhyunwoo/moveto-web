@@ -13,6 +13,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "모베토",
   description: "쉽고 빠른 파일 공유",
+  metadataBase: new URL("https://www.moveto.kr"),
   openGraph: {
     title: "모베토",
     description: "쉽고 빠른 파일 공유",
