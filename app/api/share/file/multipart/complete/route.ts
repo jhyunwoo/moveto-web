@@ -10,8 +10,6 @@ export async function POST(request: Request) {
   }: { fileKey: string; uploadId: string; uploadResults: string[] } =
     requestData
 
-  console.log("complete", fileKey, uploadId, uploadResults)
-
   const S3 = new S3Client({
     region: "auto",
     endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -25,8 +23,6 @@ export async function POST(request: Request) {
     ETag,
     PartNumber: i + 1,
   }))
-
-  console.log(part)
 
   const result = await S3.send(
     new CompleteMultipartUploadCommand({
