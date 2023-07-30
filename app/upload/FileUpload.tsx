@@ -9,6 +9,7 @@ import { accessCode, alertState } from "@/lib/recoil"
 import { useSession } from "next-auth/react"
 import Progress from "./Progress"
 import getShareTime from "@/lib/getShareTime"
+import axios from "axios"
 
 /** 파일 데이터 타입 */
 interface FileData {
@@ -22,13 +23,6 @@ export default function FileUpload() {
   /** 파일 input 태그 숨기고 버튼으로 파일 입력 받을 수 있도록 Ref 설정 */
   const fileInput = useRef<HTMLInputElement>(null)
 
-  // Progress Event 발생할 때 마다 로드율과 index 저장
-  const [progressData, setProgressData] = useState<{
-    value: number
-    index: number
-  }>()
-  // Progress 태그에 사용되는 value 값 저장
-  const [progress, setProgress] = useState<number[]>([])
   // 다운로드 후 메세지 표시
   const [downloadMessage, setDownloadMessage] = useState("")
   // 최대 업로드 크기 제한
@@ -37,6 +31,14 @@ export default function FileUpload() {
   const [totalFileSize, setTotalFileSize] = useState(0)
   // 입력 받은 파일 데이터 저장
   const [fileData, setFileData] = useState<FileData[]>([])
+
+  const [multipartProgress, setMultipartProgress] = useState<{
+    index: number
+    part: number
+    value: number
+  }>()
+  const [progress, setProgress] = useState<number[][]>()
+  const [progressValue, setProgressValue] = useState<number>(-1)
 
   /** 알림 표시 Recoil 함수 */
   const setAlert = useSetRecoilState(alertState)
@@ -62,15 +64,6 @@ export default function FileUpload() {
       lastModified: file.lastModified,
     }))
     setFileData((prevFiles) => [...prevFiles, ...newFileData])
-    for (let i = 0; i < files.length; i += 1) {
-      if (files[i].size > 5 * 1024 * 1024 * 1024 - 1024 * 1024 * 5) {
-        setAlert({
-          message: "단일 파일 크기가 4.95GiB를 초과합니다.",
-          warn: true,
-          error: false,
-        })
-      }
-    }
   }
 
   /** 받은 파일 중 삭제 */
@@ -107,13 +100,6 @@ export default function FileUpload() {
     return fileData.reduce((acc, file) => acc + file.size, 0)
   }
 
-  function warnMaxFileSize(fileSize: number) {
-    if (fileSize > 5 * 1024 * 1024 * 1024 - 1024 * 1024 * 5) {
-      return true
-    }
-    return false
-  }
-
   /** 파일 전체 크기가 업로드 크기 제한에 걸리는지 확인하는 함수 */
   const checkTotalFileSize = () => {
     const totalSize = getTotalFileSize()
@@ -142,52 +128,148 @@ export default function FileUpload() {
 
   /** 파일 업로드 함수 */
   async function handleUpload() {
-    // 파일 데이터가 존재한지 확인
-    if (fileData.length === 0) return
-    if (!fileInput?.current) return
-    if (!fileInput.current.files) return
-    if (!checkTotalFileSize()) return
+    try {
+      // 파일 데이터가 존재한지 확인
+      if (fileData.length === 0) return
+      if (!fileInput?.current) return
+      if (!fileInput.current.files) return
+      if (!checkTotalFileSize()) return
 
-    /** 업로드 완료 후 접근 코드 표시용 값 */
-    let success = 0
+      setProgressValue(0)
+      /** 업로드 완료 후 접근 코드 표시용 값 */
+      let success = 0
 
-    // start
-    const fileInfo = {
-      files: fileData,
-    }
+      // start
+      const fileInfo = {
+        files: fileData,
+      }
 
-    /** 파일 업로드 하기 전 share 정보 저장 */
-    const createShare = await fetch("/api/share", {
-      method: "POST",
-      body: JSON.stringify(fileInfo),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-
-    const shareInfo = await createShare.json()
-
-    // 파일 개수 만큼 progress 값 안에 기본값 0 생성
-    const copied = [...progress]
-    for (let i = 0; i < shareInfo.files.length; i += 1) {
-      copied.push(0)
-    }
-    setProgress(copied)
-
-    /** Progress 이벤트가 발생할 때 마다 실행하는 함수 */
-    function checkProgress(e: ProgressEvent, i: number) {
-      setProgressData({
-        value: Math.round((e.loaded / e.total) * 100),
-        index: i,
+      /** 파일 업로드 하기 전 share 정보 저장 */
+      const createShare = await fetch("/api/share", {
+        method: "POST",
+        body: JSON.stringify(fileInfo),
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
-    }
 
-    async function checkSuccess() {
-      success += 1
+      const shareInfo = await createShare.json()
 
-      if (success === shareInfo.files.length) {
+      let uploadFileInfo = []
+      let errorLog: any[] = []
+
+      for (let i = 0; i < shareInfo.files.length; i += 1) {
+        const file = fileInput.current.files[i]
+
+        let chunkSize = 100 * 1024 * 1024 // 100 MB chunk size
+        let chunks = []
+        let fileSize = file?.size
+        let start = 0
+        let end = chunkSize
+
+        while (start < fileSize) {
+          chunks.push(file.slice(start, end))
+          start = end
+          end = start + chunkSize
+        }
+        uploadFileInfo.push(chunks)
+      }
+
+      let totalProgress: number[][] = []
+      for (let i = 0; i < uploadFileInfo.length; i += 1) {
+        let chunkProgress: number[] = []
+        for (let j = 0; j < uploadFileInfo[i].length; j += 1) {
+          chunkProgress.push(0)
+        }
+        totalProgress.push(chunkProgress)
+      }
+      setProgress(totalProgress)
+
+      for (let i = 0; i < uploadFileInfo.length; i += 1) {
+        const createMultipart = await fetch("/api/share/file/multipart/start", {
+          method: "POST",
+          body: JSON.stringify({
+            fileKey: shareInfo.id + "/" + fileData[i].name,
+          }),
+        })
+        const multipartInfo = await createMultipart.json()
+
+        const uploadId = multipartInfo.UploadId
+
+        let uploadPromises: any[] = []
+
+        for (let j = 0; j < uploadFileInfo[i].length; j += 1) {
+          const uploadUrl = await fetch("/api/share/file/multipart/upload", {
+            method: "POST",
+            body: JSON.stringify({
+              fileKey: shareInfo.id + "/" + fileData[i].name,
+              uploadId: uploadId,
+              index: j + 1,
+            }),
+          })
+          const urlInfo = await uploadUrl.json()
+
+          uploadPromises.push(
+            axios
+              .put(urlInfo, uploadFileInfo[i][j], {
+                onUploadProgress(progressEvent) {
+                  if (!progressEvent.loaded) return
+                  setMultipartProgress({
+                    index: i,
+                    part: j,
+                    value: progressEvent.loaded,
+                  })
+                },
+              })
+              .catch((e) => {
+                errorLog.push({ index: i, part: j, url: urlInfo })
+                console.log(e)
+              })
+          )
+        }
+
+        while (errorLog.length > 0) {
+          for (let i = 0; i < errorLog.length; i += 1) {
+            let copiedPromises = [...uploadPromises]
+            uploadPromises[errorLog[i].part] = axios.put(
+              errorLog[i].url,
+              uploadFileInfo[errorLog[i].index][errorLog[i].part],
+              {
+                onUploadProgress(progressEvent) {
+                  if (!progressEvent.loaded) return
+                  setMultipartProgress({
+                    index: errorLog[i].index,
+                    part: errorLog[i].part,
+                    value: progressEvent.loaded,
+                  })
+                },
+              }
+            )
+            uploadPromises = copiedPromises
+          }
+        }
+
+        const res = await Promise.all(uploadPromises)
+
+        const etags = []
+        for (let j = 0; j < res.length; j += 1) {
+          etags.push(
+            res[j].headers.etag.substring(1, res[j].headers.etag.length - 1)
+          )
+        }
+
+        await fetch("/api/share/file/multipart/complete", {
+          method: "POST",
+          body: JSON.stringify({
+            fileKey: shareInfo.id + "/" + fileData[i].name,
+            uploadId: uploadId,
+            uploadResults: etags,
+          }),
+        })
+      }
+
+      if (errorLog.length === 0) {
         setDownloadMessage("업로드 완료")
-
         const requestCode = await fetch("/api/share/file/upload", {
           method: "PUT",
           body: JSON.stringify({ shareId: shareInfo.id }),
@@ -196,48 +278,17 @@ export default function FileUpload() {
           },
         })
         const codeData = await requestCode.json()
+        setProgressValue(-1)
         setFileData([])
-        setProgress([])
         setDownloadMessage("")
         setAccessCode(codeData.result.accessCode)
         if (fileInput.current) fileInput.current.value = ""
+      } else {
+        setAlert({ message: "업로드 오류", warn: false, error: true })
+        console.log(errorLog)
       }
-    }
-
-    function checkError() {
-      setProgress([])
-      setDownloadMessage("")
-      setAlert({
-        message: "업로드를 다시 시도해주세요.",
-        error: true,
-        warn: false,
-      })
-      if (fileInput.current) fileInput.current.value = ""
-    }
-
-    function checkAbort() {
-      setProgress([])
-      setAlert({ message: "업로드 중단됨", error: false, warn: true })
-      if (fileInput.current) fileInput.current.value = ""
-    }
-
-    for (let i = 0; i < shareInfo.files.length; i += 1) {
-      const uploadUrl = await fetch("/api/share/file/upload", {
-        method: "POST",
-        body: JSON.stringify({ fileInfo: fileData[i], shareInfo: shareInfo }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      const urlInfo = await uploadUrl.json()
-
-      const xhr = new XMLHttpRequest()
-      xhr.upload.addEventListener("progress", (e) => checkProgress(e, i), false)
-      xhr.addEventListener("load", checkSuccess, false)
-      xhr.addEventListener("error", checkError, false)
-      xhr.addEventListener("abort", checkAbort, false)
-      xhr.open("PUT", urlInfo.signedUrl, true)
-      xhr.send(fileInput.current.files[i])
+    } catch {
+      setAlert({ message: "파일 업로드 오류", warn: false, error: true })
     }
   }
 
@@ -263,13 +314,25 @@ export default function FileUpload() {
   }, [fileData])
 
   useEffect(() => {
-    if (typeof progressData?.index === "number") {
-      const copied = [...progress]
-      copied[progressData?.index] = progressData?.value
-      setProgress(copied)
-    }
+    if (!progress || !multipartProgress) return
+    let copied: number[][] = [...progress]
+    copied[multipartProgress?.index][multipartProgress?.part] =
+      multipartProgress?.value
+    setProgress(copied)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progressData])
+  }, [multipartProgress])
+
+  useEffect(() => {
+    if (!progress) return
+    let total = 0
+    for (let i = 0; i < progress?.length; i += 1) {
+      for (let j = 0; j < progress[i].length; j += 1) {
+        total = total + progress[i][j]
+      }
+    }
+    setProgressValue(Number(((total / getTotalFileSize()) * 100).toFixed(2)))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress])
 
   return (
     <div className='mt-2 flex w-full flex-col'>
@@ -303,13 +366,7 @@ export default function FileUpload() {
           >
             <div className='flex flex-col justify-center text-sm font-semibold'>
               <div className='break-words'>{data.name}</div>
-              <div
-                className={`${
-                  warnMaxFileSize(data.size) ? "text-red-500" : ""
-                }`}
-              >
-                ({formatBytes(data.size)})
-              </div>
+              <div>({formatBytes(data.size)})</div>
             </div>
             <button
               type='button'
@@ -337,19 +394,9 @@ export default function FileUpload() {
         >
           총 {formatBytes(totalFileSize)} / 최대 {formatBytes(maxFileSize)}
         </div>
-        <div
-          className={`ml-auto text-xs ${
-            totalFileSize > maxFileSize
-              ? "font-semibold text-red-500"
-              : "text-green-700"
-          }`}
-        >
-          단일 파일 최대
-          {formatBytes(5 * 1024 * 1024 * 1024 - 1024 * 1024 * 5)}
-        </div>
       </div>
-      {progress.length > 0 ? (
-        <Progress progress={progress} message={downloadMessage} />
+      {progressValue >= 0 ? (
+        <Progress progress={progressValue} message={downloadMessage} />
       ) : (
         ""
       )}

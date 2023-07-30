@@ -1,14 +1,11 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/react"
-import { Inter } from "next/font/google"
 import AuthProvider from "./AuthProvider"
 import Recoil from "@/components/Recoil"
 import Alert from "@/components/Alert"
 import AlertWithLink from "@/components/AlertWithLink"
 import Loading from "@/components/Loading"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "모베토",
@@ -256,7 +253,7 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang='kr'>
-        <body className={inter.className}>
+        <body>
           <Recoil>
             {children}
             <Analytics />
