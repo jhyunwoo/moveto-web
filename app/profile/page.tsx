@@ -26,7 +26,7 @@ export default async function User() {
             {session.user?.plan}
           </div>
         </div>
-        <div className=' flex items-center space-x-1 pb-6'>
+        <div className='flex items-center space-x-1 pb-6 '>
           <EnvelopeIcon className='h-5 w-5 text-slate-800 ' />
           <div>{session.user?.email}</div>
         </div>
@@ -41,7 +41,7 @@ export default async function User() {
       <div className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg'>
         <div className='grid w-full grid-cols-4 place-content-center content-center items-stretch gap-1'>
           {/* Plan */}
-          <div className='col-span-4 pb-3 text-center  text-xl font-bold'>
+          <div className='col-span-4 pb-3 text-center text-xl font-bold'>
             Plan
           </div>
           <div className='p-1 text-center text-lg font-semibold'>Guest</div>
@@ -68,14 +68,6 @@ export default async function User() {
           <div className='text-center text-lg font-semibold underline decoration-green-600 decoration-2 underline-offset-2'>
             1TiB
           </div>
-          {/* max upload file size */}
-          <div className='col-span-4 pt-3 text-center text-sm text-slate-700 '>
-            단일 파일 최대 용량
-          </div>
-
-          <div className='col-span-4  text-center text-lg font-semibold underline decoration-green-400 decoration-2 underline-offset-2'>
-            모두 4.95GiB
-          </div>
 
           {/* 공유 지속 시간 */}
           <div className='col-span-4 pt-3 text-center text-sm text-slate-700 '>
@@ -93,7 +85,7 @@ export default async function User() {
           </div>
           <Link
             href='/user/change-plan'
-            className='col-span-4 mt-4 hidden rounded-lg bg-gradient-to-r from-green-300 via-green-500  to-green-700 p-2 text-center font-semibold text-white transition duration-300 hover:shadow-lg'
+            className='col-span-4 mt-4 hidden rounded-lg bg-gradient-to-r from-green-300 via-green-500 to-green-700 p-2 text-center font-semibold text-white transition duration-300 hover:shadow-lg'
           >
             플랜 변경
           </Link>
@@ -101,7 +93,7 @@ export default async function User() {
       </div>
       <Link
         href={"/privacy"}
-        className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg  transition duration-200 hover:shadow-xl'
+        className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg transition duration-200 hover:shadow-xl'
       >
         <div className='text-sm font-semibold'>개인정보 처리 방침</div>
       </Link>
