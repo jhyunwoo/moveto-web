@@ -135,7 +135,7 @@ export default function SearchFile() {
       </form>
       {errors.accessCode && <div>{errors.accessCode.message}</div>}
       {link ? (
-        <section className='mt-4 w-full'>
+        <div className='mt-4 w-full'>
           <div className='text-xl font-semibold'>공유된 링크</div>
           <a
             target='_blank'
@@ -144,17 +144,17 @@ export default function SearchFile() {
           >
             {link}
           </a>
-        </section>
+        </div>
       ) : (
         ""
       )}
       {fileNames.length > 0 && (
-        <section className='mt-4 w-full'>
+        <div className='mt-4 w-full'>
           <div className='text-xl font-semibold'>파일 다운로드</div>
 
           <div className='mt-2 flex w-full flex-col space-y-2'>
             {fileNames.map((data, key) => (
-              <section
+              <div
                 key={nanoid()}
                 className='flex w-full items-center justify-between border-t-2 p-2'
               >
@@ -163,10 +163,10 @@ export default function SearchFile() {
                   url={fileUrl[key]}
                   filename={fileNames[key]}
                 />
-              </section>
+              </div>
             ))}
           </div>
-        </section>
+        </div>
       )}
     </div>
   )

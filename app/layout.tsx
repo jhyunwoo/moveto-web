@@ -252,17 +252,17 @@ export default function RootLayout({
 }) {
   return (
     <AuthProvider>
-      <html lang='kr'>
-        <body>
-          <Recoil>
+      <Recoil>
+        <html lang='kr'>
+          <body>
             {children}
             <Analytics />
             <Alert />
             <AlertWithLink />
             <Loading />
-          </Recoil>
-        </body>
-      </html>
+          </body>
+        </html>
+      </Recoil>
     </AuthProvider>
   )
 }

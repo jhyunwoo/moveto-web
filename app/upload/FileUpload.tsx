@@ -136,8 +136,6 @@ export default function FileUpload() {
       if (!checkTotalFileSize()) return
 
       setProgressValue(0)
-      /** 업로드 완료 후 접근 코드 표시용 값 */
-      let success = 0
 
       // start
       const fileInfo = {
@@ -158,6 +156,7 @@ export default function FileUpload() {
       let uploadFileInfo = []
       let errorLog: any[] = []
 
+      // 파일을 Chunk 크기에 맞춰 분할
       for (let i = 0; i < shareInfo.files.length; i += 1) {
         const file = fileInput.current.files[i]
 
@@ -178,6 +177,7 @@ export default function FileUpload() {
         uploadFileInfo.push(chunks)
       }
 
+      /** 전체 Progress 저장 배열 기본값 입력 */
       let totalProgress: number[][] = []
       for (let i = 0; i < uploadFileInfo.length; i += 1) {
         let chunkProgress: number[] = []
@@ -339,11 +339,11 @@ export default function FileUpload() {
   }, [progress])
 
   return (
-    <div className='flex flex-col w-full mt-2'>
-      <div className='flex flex-col items-start justify-start w-full '>
+    <div className='mt-2 flex w-full flex-col'>
+      <div className='flex w-full flex-col items-start justify-start '>
         <form
           encType='multipart/form-data'
-          className='flex justify-start w-full'
+          className='flex w-full justify-start'
         >
           <input
             type='file'
@@ -355,14 +355,14 @@ export default function FileUpload() {
           <button
             type='button'
             onClick={inputButton}
-            className='w-full p-1 px-4 mt-1 font-semibold transition duration-150 bg-white rounded-lg ring-2 ring-green-600 hover:bg-green-600 hover:text-white'
+            className='mt-1 w-full rounded-lg bg-white p-1 px-4 font-semibold ring-2 ring-green-600 transition duration-150 hover:bg-green-600 hover:text-white'
           >
             파일 추가
           </button>
         </form>
       </div>
 
-      <div className='flex flex-col p-2 mt-2 space-y-2'>
+      <div className='mt-2 flex flex-col space-y-2 p-2'>
         {fileData.map((data, key) => (
           <section
             key={nanoid()}
@@ -375,18 +375,18 @@ export default function FileUpload() {
             <button
               type='button'
               onClick={() => handleFileDelete(key)}
-              className='p-1 font-semibold text-white transition duration-150 bg-red-500 rounded-md hover:bg-red-600'
+              className='rounded-md bg-red-500 p-1 font-semibold text-white transition duration-150 hover:bg-red-600'
             >
-              <TrashIcon className='w-6 h-6 text-white' />
+              <TrashIcon className='h-6 w-6 text-white' />
             </button>
           </section>
         ))}
       </div>
-      <div className='flex flex-col items-start justify-center w-full p-2 my-2 border-2 border-green-600 rounded-lg'>
+      <div className='my-2 flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2'>
         <div className='font-semibold'>
           {session?.user.plan ? session.user.plan : "Guest"} Plan
         </div>
-        <div className='mt-2 ml-auto text-sm'>
+        <div className='ml-auto mt-2 text-sm'>
           {getShareTime(session?.user.plan)} 동안 공유
         </div>
         <div
@@ -409,7 +409,7 @@ export default function FileUpload() {
           <button
             type='button'
             onClick={handleUpload}
-            className='p-1 px-4 font-semibold text-white transition duration-150 bg-green-600 rounded-lg ring-2 ring-green-600 hover:bg-green-700 hover:ring-green-700'
+            className='rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700'
           >
             파일 업로드
           </button>
