@@ -161,7 +161,10 @@ export default function FileUpload() {
       for (let i = 0; i < shareInfo.files.length; i += 1) {
         const file = fileInput.current.files[i]
 
-        let chunkSize = 100 * 1024 * 1024 // 100 MB chunk size
+        let chunkSize = 10 * 1024 * 1024 // 10 MB chunk size
+        if (file.size > 1024 * 1024 * 1024 * 90) {
+          chunkSize = 100 * 1024 * 1024
+        }
         let chunks = []
         let fileSize = file?.size
         let start = 0
