@@ -231,28 +231,6 @@ export default function FileUpload() {
           )
         }
 
-        while (errorLog.length > 0) {
-          for (let i = 0; i < errorLog.length; i += 1) {
-            let copiedPromises = [...uploadPromises]
-            uploadPromises[errorLog[i].part] = axios.put(
-              errorLog[i].url,
-              uploadFileInfo[errorLog[i].index][errorLog[i].part],
-              {
-                onUploadProgress(progressEvent) {
-                  if (!progressEvent.loaded) return
-                  setMultipartProgress({
-                    index: errorLog[i].index,
-                    part: errorLog[i].part,
-                    value: progressEvent.loaded,
-                  })
-                },
-              }
-            )
-            uploadPromises = copiedPromises
-            errorLog = errorLog.filter((value) => value !== errorLog[i])
-          }
-        }
-
         const res = await Promise.all(uploadPromises)
 
         const etags = []
