@@ -22,11 +22,11 @@ export default async function SignIn() {
       <div className='flex w-full max-w-lg flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg'>
         <div className='p-4 text-2xl font-bold'>로그인</div>
         <div className='flex w-full flex-col space-y-2'>
-          {/* <SignInButton
+          <SignInButton
             provider='apple'
             providerName='Apple로 로그인'
             bgcolor='bg-black text-white hover:bg-slate-900'
-          /> */}
+          />
           <SignInButton
             provider='google'
             providerName='Google로 로그인'
