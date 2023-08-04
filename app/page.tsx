@@ -43,7 +43,7 @@ export default function Home() {
       <div className='flex h-screen w-full flex-col items-center justify-center bg-slate-50 p-8'>
         <BottomBar />
         <div className='flex w-full max-w-xl flex-col items-center justify-center'>
-          <div className='mr-auto pl-1 text-base font-bold '>접근 코드</div>
+          <div className='mr-auto pl-1 text-base font-bold'>접근 코드</div>
           <SearchFile />
         </div>
       </div>
@@ -52,8 +52,12 @@ export default function Home() {
           Copyright 2023. Moveto Team. all rights reserved.
         </div>
         <div>Admin: jhyunwoo0228@gmail.com</div>
-        <Link href={"https://github.com/jhyunwoo"}>Github</Link>
-        <Link href={"/privacy"}>개인정보처리방침</Link>
+        <Link href={"https://github.com/jhyunwoo"} className='hover:underline'>
+          Github
+        </Link>
+        <Link href={"/privacy"} className='hover:underline'>
+          개인정보처리방침
+        </Link>
       </div>
     </div>
   )
