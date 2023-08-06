@@ -52,7 +52,7 @@ export default function LinkUpload() {
       >
         <input
           placeholder='https://moveto.kr'
-          className='w-full rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none'
+          className='w-full break-words rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none'
           {...register("link", {
             required: { value: true, message: "링크를 입력하세요." },
           })}

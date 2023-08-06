@@ -140,7 +140,7 @@ export default function SearchFile() {
           <a
             target='_blank'
             href={link}
-            className='text-lg font-semibold text-blue-700 transition duration-100 hover:text-indigo-700 hover:underline'
+            className='break-words text-lg font-semibold text-blue-700 transition duration-100 hover:text-indigo-700 hover:underline'
           >
             {link}
           </a>
