@@ -75,18 +75,17 @@ export default async function ShareHistory() {
                   : `외 ${data.files.length - 1}개의 파일`}
               </div>
             ) : (
-              <Link
-                className=' font-semibold text-blue-600 decoration-blue-600 hover:underline'
-                href={data.link!}
-              >
-                {data.link}
+              <Link className='w-full' href={data.link!}>
+                <div className='break-words font-semibold text-blue-600 decoration-blue-600 hover:underline'>
+                  {data.link}
+                </div>
               </Link>
             )}
-            <div className='text-sm'>{korDate(data.updated)}</div>
+            <div className='break-words text-sm'>{korDate(data.updated)}</div>
             {data.accessCode ? (
               <Link
                 href={`/?code=${data.accessCode.replace(" ", "_")}`}
-                className='ml-auto rounded-md bg-green-700 p-1 px-2 font-semibold text-white transition duration-200 hover:bg-green-600 hover:shadow-md'
+                className='ml-auto break-words rounded-md bg-green-700 p-1 px-2 font-semibold text-white transition duration-200 hover:bg-green-600 hover:shadow-md'
               >
                 {data.accessCode}
               </Link>
