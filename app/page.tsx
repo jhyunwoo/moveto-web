@@ -39,8 +39,8 @@ export async function generateMetadata({
 
 export default function Home() {
   return (
-    <div>
-      <div className='flex h-screen w-full flex-col items-center justify-center bg-slate-50 p-8'>
+    <>
+      <div className='flex min-h-screen w-full flex-col items-center justify-center bg-slate-50 p-8'>
         <BottomBar />
         <div className='flex w-full max-w-xl flex-col items-center justify-center'>
           <div className='mr-auto pl-1 text-base font-bold'>접근 코드</div>
@@ -48,6 +48,6 @@ export default function Home() {
         </div>
       </div>
       <Bottom />
-    </div>
+    </>
   )
 }
