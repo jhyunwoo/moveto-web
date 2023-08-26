@@ -1,4 +1,4 @@
-import BottomBar from "@/components/MenuBar"
+import MenuBar from "@/components/MenuBar"
 import { Metadata } from "next"
 import SearchFile from "@/components/SearchFile"
 import replaceAll from "@/lib/replaceAll"
@@ -41,10 +41,10 @@ export async function generateMetadata({
 export default function Home() {
   return (
     <>
-      <div className='flex min-h-screen w-full flex-col items-center justify-center p-8  dark:text-white'>
-        <BottomBar />
-        <div className='flex w-full max-w-xl flex-col items-center justify-center'>
-          <div className='mr-auto pb-1 pl-1 text-xl font-bold dark:text-white'>
+      <div className="flex min-h-screen w-full flex-col items-center justify-center p-8  dark:text-white">
+        <MenuBar />
+        <div className="flex w-full max-w-xl flex-col items-center justify-center">
+          <div className="mr-auto pb-1 pl-1 text-xl font-bold dark:text-white">
             접근 코드
           </div>
           <SearchFile />

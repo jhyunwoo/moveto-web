@@ -13,7 +13,7 @@ export default function Loading() {
         isLoading ? "" : "hidden"
       }`}
     >
-      <Cog6ToothIcon className='h-12 w-12 animate-spin text-slate-600 dark:text-slate-300' />
+      <Cog6ToothIcon className="h-12 w-12 animate-spin text-slate-600 dark:text-slate-300" />
     </div>
   )
 }

@@ -120,29 +120,29 @@ export default function SearchFile() {
   }, [paramsCode, setAlert, setLoading, setValue])
 
   return (
-    <div className='flex w-full flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900 '>
-      <form className='flex w-full space-x-2' onSubmit={handleSubmit(onSubmit)}>
+    <div className="flex w-full flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900 ">
+      <form className="flex w-full space-x-2" onSubmit={handleSubmit(onSubmit)}>
         <input
-          className=' w-full rounded-md  p-1 text-center text-xl font-bold outline-none ring-2 ring-green-700 dark:bg-slate-800 dark:ring-green-400 dark:ring-offset-slate-800'
-          type='text'
+          className=" w-full rounded-md  p-1 text-center text-xl font-bold outline-none ring-2 ring-green-700 dark:bg-slate-800 dark:ring-green-400 dark:ring-offset-slate-800"
+          type="text"
           {...register("accessCode", {
             required: { value: true, message: "접근 코드를 입력해주세요." },
           })}
         />
-        <button type='submit'>
-          <MagnifyingGlassCircleIcon className='h-10 w-10 rounded-full text-green-700 transition duration-200 hover:bg-green-700 hover:text-white dark:text-green-400 hover:dark:bg-green-500' />
+        <button type="submit">
+          <MagnifyingGlassCircleIcon className="h-10 w-10 rounded-full text-green-700 transition duration-200 hover:bg-green-700 hover:text-white dark:text-green-400 hover:dark:bg-green-500" />
         </button>
       </form>
       {errors.accessCode && (
-        <div className='mt-1 text-red-500'>{errors.accessCode.message}</div>
+        <div className="mt-1 text-red-500">{errors.accessCode.message}</div>
       )}
       {link ? (
-        <div className='mt-4 w-full'>
-          <div className='text-xl font-semibold'>공유된 링크</div>
+        <div className="mt-4 w-full">
+          <div className="text-xl font-semibold">공유된 링크</div>
           <a
-            target='_blank'
+            target="_blank"
             href={link}
-            className='break-words text-lg font-semibold text-blue-700 transition duration-100 hover:text-indigo-700 hover:underline'
+            className="break-words text-lg font-semibold text-blue-700 transition duration-100 hover:text-indigo-700 hover:underline"
           >
             {link}
           </a>
@@ -151,16 +151,16 @@ export default function SearchFile() {
         ""
       )}
       {fileNames.length > 0 && (
-        <div className='mt-4 w-full'>
-          <div className='text-xl font-semibold'>파일 다운로드</div>
+        <div className="mt-4 w-full">
+          <div className="text-xl font-semibold">파일 다운로드</div>
 
-          <div className='mt-2 flex w-full flex-col space-y-2'>
+          <div className="mt-2 flex w-full flex-col space-y-2">
             {fileNames.map((data, key) => (
               <div
                 key={nanoid()}
-                className='flex w-full items-center justify-between border-t-2 p-2 dark:border-slate-500'
+                className="flex w-full items-center justify-between border-t-2 p-2 dark:border-slate-500"
               >
-                <div className='basis-5/6 break-words text-sm'>{data}</div>
+                <div className="basis-5/6 break-words text-sm">{data}</div>
                 <FileDownloadButton
                   url={fileUrl[key]}
                   filename={fileNames[key]}

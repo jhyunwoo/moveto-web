@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function UploadLayout({
+export default function SignInLayout({
   children,
 }: {
   children: React.ReactNode

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ReactNode } from "react"
 
-export default function ButtonLayout({
+export default function MenuBarButton({
   href,
   children,
 }: {

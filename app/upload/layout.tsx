@@ -1,5 +1,5 @@
 import Footer from "@/components/Footer"
-import BottomBar from "@/components/MenuBar"
+import MenuBar from "@/components/MenuBar"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function UploadLayout({
 }) {
   return (
     <section>
-      <BottomBar />
+      <MenuBar />
       {children}
       <Footer />
     </section>

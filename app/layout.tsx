@@ -251,7 +251,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang='kr' className='bg-slate-50 dark:bg-slate-950'>
+    <html lang="kr" className="bg-slate-50 dark:bg-slate-950">
       <body>
         <AuthProvider>
           <Recoil>

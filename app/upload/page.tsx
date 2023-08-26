@@ -17,10 +17,10 @@ export default function Upload() {
   return (
     <CenterLayout>
       {code ? <AccessCode code={code} /> : ""}
-      <div className='flex w-full max-w-xl flex-col items-center justify-center rounded-lg bg-white p-4 shadow-xl dark:bg-slate-900'>
-        <div className='flex w-full justify-around space-x-1 rounded-full bg-slate-100 p-1 dark:bg-slate-800'>
+      <div className="flex w-full max-w-xl flex-col items-center justify-center rounded-lg bg-white p-4 shadow-xl dark:bg-slate-900">
+        <div className="flex w-full justify-around space-x-1 rounded-full bg-slate-100 p-1 dark:bg-slate-800">
           <button
-            type='button'
+            type="button"
             onClick={() => setShare("File")}
             className={`${
               share === "File"
@@ -31,7 +31,7 @@ export default function Upload() {
             파일 공유
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => setShare("Link")}
             className={`${
               share === "Link"
