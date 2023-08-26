@@ -3,6 +3,7 @@
 import { alertState } from "@/lib/recoil"
 import { XCircleIcon } from "@heroicons/react/24/outline"
 import { useRecoilValue, useResetRecoilState } from "recoil"
+import PopUpLayout from "./PopUpLayout"
 
 export default function Alert() {
   const alertInfo = useRecoilValue(alertState)
@@ -10,27 +11,27 @@ export default function Alert() {
 
   if (alertInfo.message) {
     return (
-      <div className='fixed bottom-0 left-0 right-0 top-0 flex h-screen w-full items-center justify-center bg-slate-100/80 p-8 dark:bg-slate-950/80'>
-        <div className='relative flex w-full max-w-xl items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900'>
+      <PopUpLayout>
+        <div className='relative flex w-full max-w-xl items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-slate-950'>
           <button
             type='button'
             onClick={resetAlert}
-            className='absolute right-0 top-0'
+            className='absolute -right-4 -top-4'
           >
-            <XCircleIcon className='h-6 w-6 rounded-full text-slate-600 dark:text-slate-300' />
+            <XCircleIcon className='h-8 w-8 rounded-full text-slate-600 dark:text-slate-300' />
           </button>
           <div
             className={`${
-              alertInfo.error ? "text-red-700 dark:text-red-400" : ""
+              alertInfo.error && "text-red-700 dark:text-red-400"
             } ${
-              alertInfo.warn ? "text-orange-500 dark:text-orange-400" : ""
+              alertInfo.warn && "text-orange-500 dark:text-orange-400"
             } font-semibold`}
           >
             {alertInfo.message}
           </div>
         </div>
-      </div>
+      </PopUpLayout>
     )
   }
-  return <div />
+  return <></>
 }

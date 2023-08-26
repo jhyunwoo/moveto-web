@@ -1,8 +1,8 @@
-import BottomBar from "@/app/BottomBar"
+import BottomBar from "@/components/MenuBar"
 import { Metadata } from "next"
-import SearchFile from "./SearchFile"
+import SearchFile from "@/components/SearchFile"
 import replaceAll from "@/lib/replaceAll"
-import Bottom from "@/components/Bottom"
+import Footer from "@/components/Footer"
 
 type Props = {
   searchParams: { [key: string]: string | undefined }
@@ -50,7 +50,7 @@ export default function Home() {
           <SearchFile />
         </div>
       </div>
-      <Bottom />
+      <Footer />
     </>
   )
 }

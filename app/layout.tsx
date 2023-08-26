@@ -1,7 +1,7 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/react"
-import AuthProvider from "./AuthProvider"
+import AuthProvider from "../components/AuthProvider"
 import Recoil from "@/components/Recoil"
 import Alert from "@/components/Alert"
 import AlertWithLink from "@/components/AlertWithLink"

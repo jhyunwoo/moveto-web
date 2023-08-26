@@ -4,13 +4,14 @@ import {
   ArrowUpOnSquareStackIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline"
-import ButtonLayout from "./BottomBarButton"
+import ButtonLayout from "./MenuBarButton"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import Link from "next/link"
 
 export default async function BottomBar() {
   const session = await getServerSession(authOptions)
+
   return (
     <div className='fixed bottom-0 left-0 right-0 z-10 flex w-full items-center justify-center p-2 sm:bottom-full sm:top-9 sm:justify-between sm:p-0'>
       <div className='hidden flex-col bg-white/80 p-2 pl-4 font-semibold text-green-900 backdrop-blur-sm dark:bg-slate-950/80 dark:text-green-400 sm:flex sm:w-full sm:bg-slate-50/80 sm:dark:bg-slate-950/80'>
