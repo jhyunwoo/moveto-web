@@ -18,8 +18,8 @@ export default async function User() {
 
   return (
     <div className='min-h-screen w-full p-4 pb-24 dark:text-white'>
-      <div className='columns-1 space-y-4 sm:columns-2 '>
-        <div className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900'>
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
+        <div className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900 sm:col-span-2'>
           <div className='mb-1 w-full border-b-2 text-lg text-slate-600 dark:border-slate-500 dark:text-slate-300'>
             INFO
           </div>
@@ -43,7 +43,7 @@ export default async function User() {
         >
           <div className='text-lg font-semibold'>공유 기록</div>
         </Link>
-        <div className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900'>
+        <div className='flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900 sm:col-span-2'>
           <div className='grid w-full grid-cols-4 place-content-center content-center items-stretch gap-1'>
             {/* Plan */}
             <div className='col-span-4 pb-3 text-center text-xl font-bold'>
