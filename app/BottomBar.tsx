@@ -19,7 +19,7 @@ export default async function BottomBar() {
           <p className='text-sm font-medium'>로그인 없이 쉽고 빠른 파일 공유</p>
         </Link>
       </div>
-      <div className='flex w-full items-center justify-around space-x-2 rounded-3xl bg-white/80 p-2 shadow-lg backdrop-blur-sm dark:bg-slate-950/80 sm:justify-end sm:rounded-none sm:p-2 sm:shadow-none'>
+      <div className='flex w-full items-center justify-around space-x-2 rounded-3xl bg-white/80 p-2 shadow-lg backdrop-blur-sm dark:bg-slate-950/80 sm:justify-end sm:rounded-none sm:bg-slate-50/80 sm:p-2 sm:shadow-none sm:dark:bg-slate-950/80'>
         <ButtonLayout href='/upload'>
           <ArrowUpOnSquareStackIcon className='h-6 w-6 ' />
           <p>업로드</p>
