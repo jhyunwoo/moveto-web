@@ -1,8 +1,6 @@
 import CenterLayout from "@/components/CenterLayout"
 import PlanArea from "./PlanArea"
 
-export const runtime = "edge"
-
 export default function ChangePlan() {
   return (
     <CenterLayout>

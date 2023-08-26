@@ -1,8 +1,6 @@
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline"
 import Link from "next/link"
 
-export const runtime = "edge"
-
 function Paragraph({ children }: { children: React.ReactNode }) {
   return (
     <div className='rounded-lg bg-white p-4 shadow-lg dark:bg-gray-900 dark:text-white'>
