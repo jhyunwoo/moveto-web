@@ -120,20 +120,22 @@ export default function SearchFile() {
   }, [paramsCode, setAlert, setLoading, setValue])
 
   return (
-    <div className='flex w-full flex-col rounded-lg bg-white p-2 shadow-lg '>
+    <div className='flex w-full flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900 '>
       <form className='flex w-full space-x-2' onSubmit={handleSubmit(onSubmit)}>
         <input
-          className='w-full rounded-md p-1 text-center text-xl font-bold outline-none ring-2 ring-green-700'
+          className=' w-full rounded-md  p-1 text-center text-xl font-bold outline-none ring-2 ring-green-700 dark:bg-slate-800 dark:ring-green-400 dark:ring-offset-slate-800'
           type='text'
           {...register("accessCode", {
             required: { value: true, message: "접근 코드를 입력해주세요." },
           })}
         />
         <button type='submit'>
-          <MagnifyingGlassCircleIcon className='h-10 w-10 rounded-full text-green-700 transition duration-200 hover:bg-green-700 hover:text-white' />
+          <MagnifyingGlassCircleIcon className='h-10 w-10 rounded-full text-green-700 transition duration-200 hover:bg-green-700 hover:text-white dark:text-green-400 hover:dark:bg-green-500' />
         </button>
       </form>
-      {errors.accessCode && <div>{errors.accessCode.message}</div>}
+      {errors.accessCode && (
+        <div className='mt-1 text-red-500'>{errors.accessCode.message}</div>
+      )}
       {link ? (
         <div className='mt-4 w-full'>
           <div className='text-xl font-semibold'>공유된 링크</div>
@@ -156,7 +158,7 @@ export default function SearchFile() {
             {fileNames.map((data, key) => (
               <div
                 key={nanoid()}
-                className='flex w-full items-center justify-between border-t-2 p-2'
+                className='flex w-full items-center justify-between border-t-2 p-2 dark:border-slate-500'
               >
                 <div className='basis-5/6 break-words text-sm'>{data}</div>
                 <FileDownloadButton

@@ -36,7 +36,7 @@ export default async function ShareHistory() {
   }
 
   return (
-    <div className='flex min-h-screen w-full flex-col space-y-2  p-4 pb-24'>
+    <div className='flex min-h-screen w-full flex-col space-y-2  p-4 pb-24 dark:text-white'>
       <Link
         href={"/profile"}
         className='flex items-center space-x-1 text-green-600 transition duration-200 hover:text-green-700'
@@ -61,10 +61,10 @@ export default async function ShareHistory() {
         </div>
       </div>
       <div className='mt-4 text-xl font-bold'>공유 기록</div>
-      <div className='flex flex-col rounded-lg bg-white p-3 shadow-lg'>
+      <div className='flex flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900'>
         {shareHistory.map((data) => (
           <section
-            className='flex w-full flex-col items-start justify-center border-t-2 p-1'
+            className='flex w-full flex-col items-start justify-center border-t-2 p-1 dark:border-slate-500'
             key={nanoid()}
           >
             {data.files.length > 0 ? (
@@ -90,7 +90,9 @@ export default async function ShareHistory() {
                 {data.accessCode}
               </Link>
             ) : (
-              <div className='ml-auto text-red-500'>만료됨</div>
+              <div className='ml-auto text-red-500 dark:text-red-400'>
+                만료됨
+              </div>
             )}
           </section>
         ))}

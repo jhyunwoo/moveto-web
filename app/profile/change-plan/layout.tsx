@@ -1,4 +1,4 @@
-import BottomBar from "@/components/BottomBar"
+import BottomBar from "@/app/BottomBar"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {

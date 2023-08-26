@@ -45,32 +45,32 @@ export default function LinkUpload() {
   }
 
   return (
-    <div className='flex w-full flex-col items-start justify-center py-2'>
+    <div className='flex w-full flex-col items-start justify-center py-2 dark:text-white'>
       <form
         className='mt-1 flex w-full flex-col items-center justify-center space-y-2'
         onSubmit={handleSubmit(onSubmit)}
       >
         <input
           placeholder='https://moveto.kr'
-          className='w-full break-words rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none'
+          className='w-full break-words rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none dark:bg-slate-800'
           {...register("link", {
             required: { value: true, message: "링크를 입력하세요." },
           })}
         />
         {errors.link && (
-          <div className='mr-auto mt-1 text-sm font-medium text-red-500'>
+          <div className='mr-auto mt-1 text-sm font-medium text-red-500 dark:text-red-400'>
             {errors.link.message}
           </div>
         )}
         <button
           type='submit'
-          className='w-full rounded-lg bg-green-600 p-1 px-2 font-semibold text-white transition duration-150 hover:bg-green-700'
+          className='w-full rounded-lg bg-green-600 p-1 px-2 font-semibold text-white transition duration-150 hover:bg-green-700 sm:p-2'
         >
           공유
         </button>
-        <div className='ml-auto mt-2 text-sm'>
-          {session?.user.plan} Plan: {getShareTime(session?.user.plan)} 동안
-          공유
+        <div className='ml-auto mt-2'>
+          {session?.user.plan ? session?.user.plan : "Guest"} Plan:{" "}
+          {getShareTime(session?.user.plan)} 동안 공유
         </div>
       </form>
     </div>

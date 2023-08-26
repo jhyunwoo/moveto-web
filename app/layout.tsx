@@ -251,18 +251,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <AuthProvider>
-      <Recoil>
-        <html lang='kr'>
-          <body>
+    <html lang='kr' className='bg-slate-50 dark:bg-slate-950'>
+      <body>
+        <AuthProvider>
+          <Recoil>
             {children}
             <Analytics />
             <Alert />
             <AlertWithLink />
             <Loading />
-          </body>
-        </html>
-      </Recoil>
-    </AuthProvider>
+          </Recoil>
+        </AuthProvider>
+      </body>
+    </html>
   )
 }

@@ -6,7 +6,7 @@ export default function SignOut() {
     <button
       type='button'
       onClick={() => signOut()}
-      className=' w-full font-semibold text-green-700 transition duration-150  hover:text-green-800'
+      className=' dark:text-300 w-full font-semibold text-green-700 transition duration-150 hover:text-green-800  dark:hover:text-green-200'
     >
       로그아웃
     </button>

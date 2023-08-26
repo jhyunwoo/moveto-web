@@ -1,4 +1,5 @@
-import BottomBar from "@/components/BottomBar"
+import Bottom from "@/components/Bottom"
+import BottomBar from "@/app/BottomBar"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -16,9 +17,10 @@ export default function UploadLayout({
   children: React.ReactNode
 }) {
   return (
-    <section>
+    <section className='sm:pt-16'>
       <BottomBar />
       {children}
+      <Bottom />
     </section>
   )
 }

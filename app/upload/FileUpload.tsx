@@ -317,7 +317,7 @@ export default function FileUpload() {
   }, [progress])
 
   return (
-    <div className='mt-2 flex w-full flex-col'>
+    <div className='mt-2 flex w-full flex-col dark:text-white'>
       <div className='flex w-full flex-col items-start justify-start '>
         <form
           encType='multipart/form-data'
@@ -333,7 +333,7 @@ export default function FileUpload() {
           <button
             type='button'
             onClick={inputButton}
-            className='mt-1 w-full rounded-lg bg-white p-1 px-4 font-semibold ring-2 ring-green-600 transition duration-150 hover:bg-green-600 hover:text-white'
+            className='mt-1 w-full rounded-lg bg-white p-1 px-4 font-semibold ring-2 ring-green-600 transition duration-150 hover:bg-green-600 hover:text-white dark:bg-slate-800 dark:text-white sm:p-2'
           >
             파일 추가
           </button>
@@ -344,7 +344,7 @@ export default function FileUpload() {
         {fileData.map((data, key) => (
           <section
             key={nanoid()}
-            className='flex items-center justify-between border-t-2'
+            className='flex items-center justify-between border-t-2 dark:border-slate-500'
           >
             <div className='flex flex-col justify-center text-sm font-semibold'>
               <div className='break-words'>{data.name}</div>
@@ -361,7 +361,7 @@ export default function FileUpload() {
         ))}
       </div>
       <div className='my-2 flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2'>
-        <div className='font-semibold'>
+        <div className='text-lg font-semibold'>
           {session?.user.plan ? session.user.plan : "Guest"} Plan
         </div>
         <div className='ml-auto mt-2 text-sm'>
@@ -371,7 +371,7 @@ export default function FileUpload() {
           className={`ml-auto text-sm ${
             totalFileSize > maxFileSize
               ? "font-semibold text-red-500"
-              : "text-green-700"
+              : "text-green-700 dark:text-green-300"
           }`}
         >
           총 {formatBytes(totalFileSize)} / 최대 {formatBytes(maxFileSize)}
