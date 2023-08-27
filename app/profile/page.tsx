@@ -67,7 +67,7 @@ export default async function User() {
             </div>
           </div>
           <div className="flex items-center space-x-1 pb-6 ">
-            <EnvelopeIcon className="h-5 w-5 text-slate-800 " />
+            <EnvelopeIcon className="h-5 w-5 text-slate-800 dark:text-slate-200" />
             <div>{session.user?.email}</div>
           </div>
           <SignOut />

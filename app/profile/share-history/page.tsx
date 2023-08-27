@@ -36,20 +36,20 @@ export default async function ShareHistory() {
   }
 
   return (
-    <div className='flex min-h-screen w-full flex-col space-y-2  p-4 pb-24 dark:text-white'>
+    <div className="flex min-h-screen w-full flex-col space-y-2  p-4 pb-24 dark:text-white">
       <Link
         href={"/profile"}
-        className='flex items-center space-x-1 text-green-600 transition duration-200 hover:text-green-700'
+        className="flex items-center space-x-1 text-green-600 transition duration-200 hover:text-green-700"
       >
-        <ChevronDoubleLeftIcon className='h-6 w-6' />
-        <div className='font-semibold'>프로필</div>
+        <ChevronDoubleLeftIcon className="h-6 w-6" />
+        <div className="font-semibold">프로필</div>
       </Link>
 
-      <div className='flex flex-col p-3 '>
-        <div className='flex w-full items-center justify-between'>
+      <div className="flex flex-col p-3 ">
+        <div className="flex w-full items-center justify-between">
           <div>
-            <div className='text-lg font-semibold'>{session.user.name}</div>
-            <div className='text-sm'>{session.user.email}</div>
+            <div className="text-lg font-semibold">{session.user.name}</div>
+            <div className="text-sm">{session.user.email}</div>
           </div>
           <div
             className={`font-semibold bg-${planColor(
@@ -60,37 +60,37 @@ export default async function ShareHistory() {
           </div>
         </div>
       </div>
-      <div className='mt-4 text-xl font-bold'>공유 기록</div>
-      <div className='flex flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900'>
+      <div className="mt-4 text-xl font-bold">공유 기록</div>
+      <div className="flex flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900">
         {shareHistory.map((data) => (
           <section
-            className='flex w-full flex-col items-start justify-center border-t-2 p-1 dark:border-slate-500'
+            className="flex w-full flex-col items-start justify-center border-t-2 p-1 dark:border-slate-500"
             key={nanoid()}
           >
             {data.files.length > 0 ? (
-              <div className=' font-semibold'>
+              <div className=" font-semibold">
                 {data.files[0]}
                 {data.files.length === 1
                   ? ""
                   : `외 ${data.files.length - 1}개의 파일`}
               </div>
             ) : (
-              <Link className='w-full' href={data.link!}>
-                <div className='break-words font-semibold text-blue-600 decoration-blue-600 hover:underline'>
+              <Link className="w-full" href={data?.link ? data.link : ""}>
+                <div className="break-words font-semibold text-blue-600 decoration-blue-600 hover:underline">
                   {data.link}
                 </div>
               </Link>
             )}
-            <div className='break-words text-sm'>{korDate(data.updated)}</div>
+            <div className="break-words text-sm">{korDate(data.updated)}</div>
             {data.accessCode ? (
               <Link
                 href={`/?code=${data.accessCode.replace(" ", "_")}`}
-                className='ml-auto break-words rounded-md bg-green-700 p-1 px-2 font-semibold text-white transition duration-200 hover:bg-green-600 hover:shadow-md'
+                className="ml-auto break-words rounded-md bg-green-700 p-1 px-2 font-semibold text-white transition duration-200 hover:bg-green-600 hover:shadow-md"
               >
                 {data.accessCode}
               </Link>
             ) : (
-              <div className='ml-auto text-red-500 dark:text-red-400'>
+              <div className="ml-auto text-red-500 dark:text-red-400">
                 만료됨
               </div>
             )}

@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     },
   })
 
-  const fileKey = shareInfo.id + "/" + fileInfo.name
+  const fileKey = shareInfo + "/" + fileInfo.name
 
   const command = new PutObjectCommand({
     Bucket: "moveto-bucket",
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
   const signedUrl = await getSignedUrl(S3, command, { expiresIn: 3600 })
 
-  return NextResponse.json({ signedUrl })
+  return NextResponse.json(signedUrl)
 }
 
 /** get access code after upload file */

@@ -83,11 +83,6 @@ export async function POST(request: Request) {
 
   const session = await getServerSession(authOptions)
 
-  const fileList: string[] = []
-  for (let i = 0; i < files.length; i += 1) {
-    fileList.push(files[i].name)
-  }
-
   let createShare
   if (session?.user?.id) {
     createShare = await prisma.shares.create({
@@ -95,13 +90,13 @@ export async function POST(request: Request) {
         user: {
           connect: { id: session.user.id },
         },
-        files: fileList,
+        files: files,
       },
     })
   } else {
     createShare = await prisma.shares.create({
       data: {
-        files: fileList,
+        files: files,
       },
     })
   }

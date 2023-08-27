@@ -1,338 +1,224 @@
 "use client"
 
 import formatBytes from "@/lib/formatBytes"
-import React, { useRef, useState, ChangeEvent, useEffect } from "react"
+import React, {
+  useRef,
+  useState,
+  ChangeEvent,
+  useEffect,
+  useCallback,
+} from "react"
 import { nanoid } from "nanoid"
 import { TrashIcon } from "@heroicons/react/24/outline"
 import { useSetRecoilState } from "recoil"
-import { accessCode, alertState } from "@/lib/recoil"
+import { accessCode, alertState, loadingState } from "@/lib/recoil"
 import { useSession } from "next-auth/react"
 import Progress from "./Progress"
 import getShareTime from "@/lib/getShareTime"
-import axios from "axios"
+import getTotalFileSize from "@/lib/getTotalFileSize"
+import getFileNameList from "@/lib/getFileNameList"
 
-/** 파일 데이터 타입 */
-interface FileData {
-  name: string
-  size: number
-  type: string
-  lastModified: number
+const ONEGB = 1024 * 1024 * 1024
+const ONEMB = 1024 * 1024
+
+type ProgressUpdateType = {
+  id: number
+  uploaded: number
 }
 
 export default function FileUpload() {
-  /** 파일 input 태그 숨기고 버튼으로 파일 입력 받을 수 있도록 Ref 설정 */
-  const fileInput = useRef<HTMLInputElement>(null)
+  const { data: session, status } = useSession()
+  const [files, setFiles] = useState<File[]>([])
+  const [maxFileSize, setMaxFileSize] = useState<number>(1024 * 1024 * 1024) // 1GB
+  const [totalFileSize, setTotalFileSize] = useState<number>(0)
+  const [progress, setProgress] = useState<number[]>([])
+  const [progressValue, setProgressValue] = useState(0)
+  const [progressUpdate, setProgressUpdate] = useState<ProgressUpdateType[]>([])
+  const [progressMessage, setProgressMessage] = useState("")
 
-  // 다운로드 후 메세지 표시
-  const [downloadMessage, setDownloadMessage] = useState("")
-  // 최대 업로드 크기 제한
-  const [maxFileSize, setMaxFileSize] = useState(1024 * 1024 * 1024) // 1GB
-  // 전체 파일 사이즈 저장
-  const [totalFileSize, setTotalFileSize] = useState(0)
-  // 입력 받은 파일 데이터 저장
-  const [fileData, setFileData] = useState<FileData[]>([])
-
-  const [multipartProgress, setMultipartProgress] = useState<{
-    index: number
-    part: number
-    value: number
-  }>()
-  const [progress, setProgress] = useState<number[][]>()
-  const [progressValue, setProgressValue] = useState<number>(-1)
-
-  /** 알림 표시 Recoil 함수 */
-  const setAlert = useSetRecoilState(alertState)
-  /** 접근 코드 표시 Recoil 함수 */
   const setAccessCode = useSetRecoilState(accessCode)
+  const setAlert = useSetRecoilState(alertState)
+  const setLoading = useSetRecoilState(loadingState)
 
-  // 사용자 로그인 정보 확인
-  const { data: session } = useSession()
+  const workerRef = useRef<Worker>()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  /** 버튼 눌렀을 때 input 태그에서 파일 받는 함수 */
-  function inputButton() {
-    fileInput.current?.click()
-  }
-
-  /** 받은 파일 값 변경 시 fileData에 값 저장 */
-  const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDownloadMessage("")
-    const files = Array.from(event.target.files ?? [])
-    const newFileData: FileData[] = files.map((file) => ({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: file.lastModified,
-    }))
-    setFileData((prevFiles) => [...prevFiles, ...newFileData])
-  }
-
-  /** 받은 파일 중 삭제 */
-  const handleFileDelete = (index: number) => {
-    setFileData((prevFiles) => {
-      const updatedFiles = [...prevFiles]
-      updatedFiles.splice(index, 1)
-      return updatedFiles
-    })
-    if (
-      fileInput.current &&
-      fileInput.current.files &&
-      fileInput.current.files.length > index
-    ) {
-      const filesWithoutDeletedFile = Array.from(
-        fileInput.current.files
-      ).filter((_, i) => i !== index)
-
-      // Create a new DataTransfer object to store the files
-      const dataTransfer = new DataTransfer()
-
-      // Add each file to the DataTransfer object
-      filesWithoutDeletedFile.forEach((file) => {
-        dataTransfer.items.add(file)
-      })
-
-      // Set the DataTransfer object files to the file input
-      fileInput.current.files = dataTransfer.files
+  /** input 태그에 파일 값 변경시 filse state에 새로운 파일만 값 저장 */
+  function handleInputChage(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.files) {
+      const inputList = Array.from(e.target.files)
+      const fileNames = getFileNameList(files)
+      const newFiles = inputList.filter(
+        (data: File) => !fileNames.includes(data.name)
+      )
+      const targetFiles = [...files, ...newFiles]
+      setTotalFileSize(getTotalFileSize(targetFiles))
+      setFiles(targetFiles)
     }
   }
 
-  /** 받은 파일 전체 크기 계산후 반환 */
-  function getTotalFileSize() {
-    return fileData.reduce((acc, file) => acc + file.size, 0)
-  }
+  /** 파일 삭제 함수 */
+  function handleFileDelete(index: number) {
+    const newFiles = [...files.slice(0, index), ...files.slice(index + 1)]
 
-  /** 파일 전체 크기가 업로드 크기 제한에 걸리는지 확인하는 함수 */
-  const checkTotalFileSize = () => {
-    const totalSize = getTotalFileSize()
-
-    if (totalSize > maxFileSize) {
-      if (session?.user) {
-        setAlert({
-          message: `${session.user.plan} 플랜에서는 최대 ${formatBytes(
-            maxFileSize
-          )}까지 업로드 가능합니다.`,
-          warn: true,
-          error: false,
-        })
-      } else {
-        setAlert({
-          message:
-            "로그인 하지 않은 상태에서는 최대 1GB까지 업로드 가능합니다.",
-          warn: true,
-          error: false,
-        })
-      }
-      return false
+    const store = new DataTransfer()
+    newFiles.forEach((file) => store.items.add(file))
+    if (fileInputRef.current) {
+      fileInputRef.current.files = store.files
     }
-    return true
+    setFiles(newFiles)
   }
 
-  /** 파일 업로드 함수 */
+  /** 버튼 클릭 시 input 태그 클릭 */
+  function clickInput() {
+    fileInputRef.current?.click()
+  }
+
+  /** worker에 파일 업로드 명령 */
+  function handleWorker({ shareId }: { shareId: string }) {
+    workerRef.current?.postMessage({ files: files, shareId: shareId })
+  }
+
+  /** 파일 업로드 실생시 share 값 생성 후 worker에 파일 업로드 요청 */
   async function handleUpload() {
-    try {
-      // 파일 데이터가 존재한지 확인
-      if (fileData.length === 0) return
-      if (!fileInput?.current) return
-      if (!fileInput.current.files) return
-      if (!checkTotalFileSize()) return
-
-      setProgressValue(0)
-
-      // start
-      const fileInfo = {
-        files: fileData,
-      }
-
-      /** 파일 업로드 하기 전 share 정보 저장 */
-      const createShare = await fetch("/api/share", {
-        method: "POST",
-        body: JSON.stringify(fileInfo),
-        headers: {
-          "Content-Type": "application/json",
-        },
+    setLoading(true)
+    if (totalFileSize > maxFileSize) {
+      setAlert({
+        message: "업로드 가능한 크기를 초과하였습니다.",
+        warn: true,
+        error: false,
       })
-
-      const shareInfo = await createShare.json()
-
-      let uploadFileInfo = []
-      let errorLog: any[] = []
-
-      // 파일을 Chunk 크기에 맞춰 분할
-      for (let i = 0; i < shareInfo.files.length; i += 1) {
-        const file = fileInput.current.files[i]
-
-        let chunkSize = 10 * 1024 * 1024 // 10 MB chunk size
-        if (file.size > 1024 * 1024 * 1024 * 90) {
-          chunkSize = 100 * 1024 * 1024
-        }
-        let chunks = []
-        let fileSize = file?.size
-        let start = 0
-        let end = chunkSize
-
-        while (start < fileSize) {
-          chunks.push(file.slice(start, end))
-          start = end
-          end = start + chunkSize
-        }
-        uploadFileInfo.push(chunks)
-      }
-
-      /** 전체 Progress 저장 배열 기본값 입력 */
-      let totalProgress: number[][] = []
-      for (let i = 0; i < uploadFileInfo.length; i += 1) {
-        let chunkProgress: number[] = []
-        for (let j = 0; j < uploadFileInfo[i].length; j += 1) {
-          chunkProgress.push(0)
-        }
-        totalProgress.push(chunkProgress)
-      }
-      setProgress(totalProgress)
-
-      for (let i = 0; i < uploadFileInfo.length; i += 1) {
-        const createMultipart = await fetch("/api/share/file/multipart/start", {
-          method: "POST",
-          body: JSON.stringify({
-            fileKey: shareInfo.id + "/" + fileData[i].name,
-          }),
-        })
-        const multipartInfo = await createMultipart.json()
-
-        const uploadId = multipartInfo.UploadId
-
-        let uploadPromises: any[] = []
-
-        for (let j = 0; j < uploadFileInfo[i].length; j += 1) {
-          const uploadUrl = await fetch("/api/share/file/multipart/upload", {
-            method: "POST",
-            body: JSON.stringify({
-              fileKey: shareInfo.id + "/" + fileData[i].name,
-              uploadId: uploadId,
-              index: j + 1,
-            }),
-          })
-          const urlInfo = await uploadUrl.json()
-
-          uploadPromises.push(
-            axios
-              .put(urlInfo, uploadFileInfo[i][j], {
-                onUploadProgress(progressEvent) {
-                  if (!progressEvent.loaded) return
-                  setMultipartProgress({
-                    index: i,
-                    part: j,
-                    value: progressEvent.loaded,
-                  })
-                },
-              })
-              .catch((e) => {
-                errorLog.push({ index: i, part: j, url: urlInfo })
-                console.log(e)
-              })
-          )
-        }
-
-        const res = await Promise.all(uploadPromises)
-
-        const etags = []
-        for (let j = 0; j < res.length; j += 1) {
-          etags.push(
-            res[j].headers.etag.substring(1, res[j].headers.etag.length - 1)
-          )
-        }
-
-        await fetch("/api/share/file/multipart/complete", {
-          method: "POST",
-          body: JSON.stringify({
-            fileKey: shareInfo.id + "/" + fileData[i].name,
-            uploadId: uploadId,
-            uploadResults: etags,
-          }),
-        })
-      }
-
-      if (errorLog.length === 0) {
-        setDownloadMessage("업로드 완료")
-        const requestCode = await fetch("/api/share/file/upload", {
-          method: "PUT",
-          body: JSON.stringify({ shareId: shareInfo.id }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        const codeData = await requestCode.json()
-        setProgressValue(-1)
-        setFileData([])
-        setDownloadMessage("")
-        setAccessCode(codeData.result.accessCode)
-        if (fileInput.current) fileInput.current.value = ""
-      } else {
-        setAlert({ message: "업로드 오류", warn: false, error: true })
-      }
-    } catch (e) {
-      console.log(e)
-      setAlert({ message: "파일 업로드 오류", warn: false, error: true })
+      setLoading(false)
+      return
     }
+
+    /** share 생성 */
+    const createShare = await fetch("/api/share", {
+      method: "POST",
+      body: JSON.stringify({ files: getFileNameList(files) }),
+    })
+    const result = await createShare.json()
+
+    /** 파일 업로드 분할 개수 구하는 함수 */
+    function getFileUploadChunkList() {
+      let count = 0
+      for (let i = 0; i < files.length; i += 1) {
+        if (files[i].size < 110 * ONEMB) {
+          count = count += 1
+        } else {
+          count = count + Math.ceil(files[i].size / (110 * ONEMB))
+        }
+      }
+      return count
+    }
+
+    /** progress 추적을 위한 기본 값 세팅 */
+    const progressList = new Array(getFileUploadChunkList()).fill(0)
+    setProgress(progressList)
+
+    // worker에 업로드 요청
+    handleWorker({ shareId: result.id })
+    setTimeout(() => {
+      setLoading(false)
+    }, 3000)
   }
 
+  /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
+  async function finishUpload(shareId: string) {
+    setProgressMessage("업로드 완료")
+    const requestCode = await fetch("/api/share/file/upload", {
+      method: "PUT",
+      body: JSON.stringify({ shareId: shareId }),
+    })
+    const codeData = await requestCode.json()
+    setAccessCode(codeData.result.accessCode)
+    setFiles([])
+    setProgress([])
+    setProgressUpdate([])
+    if (fileInputRef.current) fileInputRef.current.value = ""
+    setProgressMessage("")
+  }
+
+  // worker 설정 useEffect
   useEffect(() => {
-    async function setFileSize() {
-      if (session?.user?.plan) {
-        const userInfo = session.user.plan
-        if (userInfo === "Free") {
-          setMaxFileSize(1024 * 1024 * 1024 * 10) // 10 GB
-        } else if (userInfo === "Basic") {
-          setMaxFileSize(1024 * 1024 * 1024 * 100) // 100GB
-        } else if (userInfo === "Pro") {
-          setMaxFileSize(1024 * 1024 * 1024 * 1024) // 1TB
-        }
+    workerRef.current = new Worker(
+      new URL("public/worker/fileUpload.ts", import.meta.url)
+    )
+    workerRef.current.onmessage = (event: MessageEvent<any>) => {
+      if (event.data.message === "upload complete") {
+        finishUpload(event.data.shareId)
+      } else if (event.data.message === "upload error") {
+        setAlert({ message: "업로드 오류", error: true, warn: false })
+        setProgress([])
+        setProgressUpdate([])
+        setProgressValue(0)
+      } else {
+        setProgressUpdate([...progressUpdate, event.data])
       }
     }
-    setFileSize()
-  }, [session?.user.plan])
-
-  useEffect(() => {
-    const totalSize = fileData.reduce((acc, file) => acc + file.size, 0)
-    setTotalFileSize(totalSize)
-  }, [fileData])
-
-  useEffect(() => {
-    if (!progress || !multipartProgress) return
-    let copied: number[][] = [...progress]
-    copied[multipartProgress?.index][multipartProgress?.part] =
-      multipartProgress?.value
-    setProgress(copied)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [multipartProgress])
-
-  useEffect(() => {
-    if (!progress) return
-    let total = 0
-    for (let i = 0; i < progress?.length; i += 1) {
-      for (let j = 0; j < progress[i].length; j += 1) {
-        total = total + progress[i][j]
-      }
+    return () => {
+      workerRef.current?.terminate()
     }
-    setProgressValue(Number(((total / getTotalFileSize()) * 100).toFixed(2)))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // 플랜별 업로드 가능 크기 설정
+  useEffect(() => {
+    if (session?.user?.plan === "Free") {
+      setMaxFileSize(ONEGB * 10)
+    } else if (session?.user.plan === "Basic") {
+      setMaxFileSize(ONEGB * 100)
+    } else if (session?.user.plan === "Pro") {
+      setMaxFileSize(ONEGB * 1024)
+    }
+  }, [session])
+
+  // progress 변경시 progressValue 값 변경
+  useEffect(() => {
+    const totalSize = getTotalFileSize(files)
+    let uploadedBytes = 0
+    if (progress.length > 0) {
+      uploadedBytes = progress.reduce(function add(sum, currValue) {
+        return sum + currValue
+      }, 0)
+    }
+
+    let value = 0
+    if (totalSize !== 0) {
+      value = Number(((uploadedBytes / totalSize) * 100).toFixed(2))
+    }
+    setProgressValue(value)
   }, [progress])
+
+  // worker에서 받은 업로드 진행 값 기반 progressUpdate 업데이트 useEffect
+  useEffect(() => {
+    if (progressUpdate.length > 0) {
+      const lastUpdate = progressUpdate.slice(-1)[0]
+      let copy = [...progress]
+      copy[lastUpdate.id] = lastUpdate.uploaded
+      setProgress(copy)
+    }
+  }, [progressUpdate])
+
+  // 입력 받은 파일 크기 합 구하는 useEffect
+  useEffect(() => setTotalFileSize(getTotalFileSize(files)), [files])
 
   return (
     <div className="mt-2 flex w-full flex-col dark:text-white">
-      <div className="flex w-full flex-col items-start justify-start ">
+      <div className="flex w-full flex-col items-start justify-start">
         <form
           encType="multipart/form-data"
           className="flex w-full justify-start"
         >
           <input
             type="file"
-            onChange={handleFileInputChange}
             multiple
+            onChange={handleInputChage}
             style={{ display: "none" }}
-            ref={fileInput}
+            ref={fileInputRef}
           />
           <button
             type="button"
-            onClick={inputButton}
+            onClick={clickInput}
             className="mt-1 w-full rounded-lg bg-white p-1 px-4 font-semibold ring-2 ring-green-600 transition duration-150 hover:bg-green-600 hover:text-white dark:bg-slate-800 dark:text-white sm:p-2"
           >
             파일 추가
@@ -341,7 +227,7 @@ export default function FileUpload() {
       </div>
 
       <div className="mt-2 flex flex-col space-y-2 p-2">
-        {fileData.map((data, key) => (
+        {files.map((data, key) => (
           <section
             key={nanoid()}
             className="flex items-center justify-between border-t-2 dark:border-slate-500"
@@ -361,9 +247,13 @@ export default function FileUpload() {
         ))}
       </div>
       <div className="my-2 flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2">
-        <div className="text-lg font-semibold">
-          {session?.user.plan ? session.user.plan : "Guest"} Plan
-        </div>
+        {status === "loading" ? (
+          <div className="h-7 w-full animate-pulse rounded-md bg-slate-200 text-lg font-semibold dark:bg-slate-700" />
+        ) : (
+          <div className="text-lg font-semibold">
+            {session?.user.plan ? session.user.plan : "Guest"} Plan
+          </div>
+        )}
         <div className="ml-auto mt-2 text-sm">
           {getShareTime(session?.user.plan)} 동안 공유
         </div>
@@ -377,12 +267,12 @@ export default function FileUpload() {
           총 {formatBytes(totalFileSize)} / 최대 {formatBytes(maxFileSize)}
         </div>
       </div>
-      {progressValue >= 0 ? (
-        <Progress progress={progressValue} message={downloadMessage} />
+      {progressValue > 0 ? (
+        <Progress progress={progressValue} message={progressMessage} />
       ) : (
         ""
       )}
-      {fileData.length > 0 ? (
+      {files.length > 0 ? (
         <>
           <button
             type="button"
