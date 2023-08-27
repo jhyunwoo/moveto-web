@@ -161,31 +161,23 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
 
   while (errorList.length > 0) {
     console.log(errorList)
-    const requestSingleUploadUrl = await fetch("/api/share/file/upload", {
-      method: "POST",
-      body: JSON.stringify({
-        fileInfo: {
-          name: files[errorList[0].id].name,
-          type: files[errorList[0].id].type,
-        },
-        shareInfo: shareId,
-      }),
-    })
-    const uploadUrl = await requestSingleUploadUrl.json()
 
-    await axios
-      .put(uploadUrl, files[errorList[0].id], {
+    const reupload = await axios.put(
+      errorList[0].uploadUrl,
+      files[errorList[0].id],
+      {
         onUploadProgress(progressEvent) {
           postMessage({
             id: errorList[0].count,
             uploaded: progressEvent.loaded,
           })
         },
-      })
-      .then(() => {
-        errorList.shift()
-      })
-      .catch((e) => console.log("error", e))
+      }
+    )
+    if (reupload) {
+      console.log(reupload)
+      errorList.shift()
+    }
   }
   self.postMessage({ message: "upload complete", shareId: event.data.shareId })
 })
