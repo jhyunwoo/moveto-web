@@ -27,7 +27,7 @@ type ProgressUpdateType = {
 }
 
 export default function FileUpload() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [files, setFiles] = useState<File[]>([])
   const [maxFileSize, setMaxFileSize] = useState<number>(1024 * 1024 * 1024) // 1GB
   const [totalFileSize, setTotalFileSize] = useState<number>(0)
@@ -247,9 +247,13 @@ export default function FileUpload() {
         ))}
       </div>
       <div className="my-2 flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2">
-        <div className="text-lg font-semibold">
-          {session?.user.plan ? session.user.plan : "Guest"} Plan
-        </div>
+        {status === "loading" ? (
+          <div className="h-7 w-full animate-pulse rounded-md bg-slate-200 text-lg font-semibold dark:bg-slate-700" />
+        ) : (
+          <div className="text-lg font-semibold">
+            {session?.user.plan ? session.user.plan : "Guest"} Plan
+          </div>
+        )}
         <div className="ml-auto mt-2 text-sm">
           {getShareTime(session?.user.plan)} 동안 공유
         </div>
