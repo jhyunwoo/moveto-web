@@ -38,7 +38,6 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
             },
           })
           .catch((e) => {
-            console.log("error", e)
             errorList.push({
               id: i,
               uploadUrl: uploadUrl,
@@ -92,7 +91,6 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
               },
             })
             .catch((e) => {
-              console.log("error", e)
               multipartError.push({ id: i, address: j, count: currentCount })
             })
         )
@@ -123,7 +121,6 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
             },
           })
           .catch((e) => {
-            console.log("error", e)
             multipartError.push({
               id: multipartError[0].id,
               address: jIndex,
@@ -131,7 +128,6 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
             })
           })
 
-        console.log(multipartPromises)
         multipartRes = await Promise.all(multipartPromises)
         multipartError.shift()
       }
