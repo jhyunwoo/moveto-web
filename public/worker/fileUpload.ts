@@ -8,9 +8,13 @@ type FileInput = {
 const onemb = 1024 * 1024
 
 self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
+  /** 요청에서 받아온 파일 데이터 */
   const files = event.data.files
+  /** 생성한 share id */
   const shareId = event.data.shareId
+  /** 병렬 다운로드를 위한 Promise 배열 */
   let uploadPromises: Promise<any>[] = []
+  /** Progress Value 계산을 위한 Progress 위치 특정용 변수 */
   let progressCount = 0
   let errorList: {
     id: number
@@ -38,6 +42,7 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
             },
           })
           .catch((e) => {
+            console.log(e)
             errorList.push({
               id: i,
               uploadUrl: uploadUrl,
@@ -155,31 +160,24 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
   const res = await Promise.all(uploadPromises)
 
   while (errorList.length > 0) {
-    const requestSingleUploadUrl = await fetch("/api/share/file/upload", {
-      method: "POST",
-      body: JSON.stringify({
-        fileInfo: {
-          name: files[errorList[0].id].name,
-          type: files[errorList[0].id].type,
-        },
-        shareInfo: shareId,
-      }),
-    })
-    const uploadUrl = await requestSingleUploadUrl.json()
+    console.log(errorList)
 
-    await axios
-      .put(uploadUrl, files[errorList[0].id], {
+    const reupload = await axios.put(
+      errorList[0].uploadUrl,
+      files[errorList[0].id],
+      {
         onUploadProgress(progressEvent) {
           postMessage({
             id: errorList[0].count,
             uploaded: progressEvent.loaded,
           })
         },
-      })
-      .then(() => {
-        errorList.shift()
-      })
-      .catch((e) => console.log("error", e))
+      }
+    )
+    if (reupload) {
+      console.log(reupload)
+      errorList.shift()
+    }
   }
   self.postMessage({ message: "upload complete", shareId: event.data.shareId })
 })
