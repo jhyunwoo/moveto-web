@@ -12,6 +12,11 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
   const shareId = event.data.shareId
   let uploadPromises: Promise<any>[] = []
   let progressCount = 0
+  let errorList: {
+    id: number
+    uploadUrl: string
+    count: number
+  }[] = []
 
   for (let i = 0; i < files.length; i += 1) {
     if (files[i].size < 110 * onemb) {
@@ -26,17 +31,28 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
       const uploadUrl = await requestSingleUploadUrl.json()
 
       uploadPromises.push(
-        axios.put(uploadUrl, files[i], {
-          onUploadProgress(progressEvent) {
-            postMessage({ id: currentCount, uploaded: progressEvent.loaded })
-          },
-        })
+        axios
+          .put(uploadUrl, files[i], {
+            onUploadProgress(progressEvent) {
+              postMessage({ id: currentCount, uploaded: progressEvent.loaded })
+            },
+          })
+          .catch((e) => {
+            console.log("error", e)
+            errorList.push({
+              id: i,
+              uploadUrl: uploadUrl,
+              count: currentCount,
+            })
+          })
       )
       progressCount = progressCount + 1
     } else {
       let chunks = []
       let start = 0
       let end = 110 * onemb
+      let multipartError: { id: number; address: number; count: number }[] = []
+
       while (start < files[i].size) {
         chunks.push(files[i].slice(start, end))
         start = end
@@ -51,7 +67,7 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
       const multipartInfo = await createMultipart.json()
 
       const uploadId = multipartInfo.UploadId
-      let multipartPromises: Promise<any>[] = []
+      let multipartPromises: any[] = []
 
       for (let j = 0; j < chunks.length; j += 1) {
         let currentCount = progressCount
@@ -66,17 +82,51 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
         const urlInfo = await uploadUrl.json()
 
         multipartPromises.push(
-          axios.put(urlInfo, chunks[j], {
-            onUploadProgress(progressEvent) {
-              postMessage({ id: currentCount, uploaded: progressEvent.loaded })
-            },
-          })
+          axios
+            .put(urlInfo, chunks[j], {
+              onUploadProgress(progressEvent) {
+                postMessage({
+                  id: currentCount,
+                  uploaded: progressEvent.loaded,
+                })
+              },
+            })
+            .catch((e) => {
+              console.log("error", e)
+              multipartError.push({ id: i, address: j, count: currentCount })
+            })
         )
 
         progressCount = progressCount + 1
       }
       const multipartRes = await Promise.all(multipartPromises)
-
+      while (multipartError.length > 0) {
+        const uploadUrl = await fetch("/api/share/file/multipart/upload", {
+          method: "POST",
+          body: JSON.stringify({
+            fileKey: shareId + "/" + files[multipartError[0].id].name,
+            uploadId: uploadId,
+            index: multipartError[0].address + 1,
+          }),
+        })
+        const urlInfo = await uploadUrl.json()
+        const reupload = await axios
+          .put(urlInfo, chunks[multipartError[0].address], {
+            onUploadProgress(progressEvent) {
+              postMessage({
+                id: multipartError[0].count,
+                uploaded: progressEvent.loaded,
+              })
+            },
+          })
+          .then((e) => {
+            multipartError.shift()
+            multipartPromises[multipartError[0].address] = e
+          })
+          .catch((e) => {
+            console.log("error", e)
+          })
+      }
       const etags = []
       for (let j = 0; j < multipartRes.length; j += 1) {
         etags.push(
@@ -98,10 +148,34 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
     }
   }
 
-  try {
-    const res = await Promise.all(uploadPromises)
-  } catch {
-    self.postMessage({ message: "upload error", shareId: event.data.shareId })
+  const res = await Promise.all(uploadPromises)
+
+  while (errorList.length > 0) {
+    const requestSingleUploadUrl = await fetch("/api/share/file/upload", {
+      method: "POST",
+      body: JSON.stringify({
+        fileInfo: {
+          name: files[errorList[0].id].name,
+          type: files[errorList[0].id].type,
+        },
+        shareInfo: shareId,
+      }),
+    })
+    const uploadUrl = await requestSingleUploadUrl.json()
+
+    await axios
+      .put(uploadUrl, files[errorList[0].id], {
+        onUploadProgress(progressEvent) {
+          postMessage({
+            id: errorList[0].count,
+            uploaded: progressEvent.loaded,
+          })
+        },
+      })
+      .then(() => {
+        errorList.shift()
+      })
+      .catch((e) => console.log("error", e))
   }
   self.postMessage({ message: "upload complete", shareId: event.data.shareId })
 })
