@@ -121,8 +121,8 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
           })
           .then((e) => {
             console.log(e)
-            multipartError.shift()
             multipartPromises[multipartError[0].address] = e
+            multipartError.shift()
           })
           .catch((e) => {
             console.log("error", e)
