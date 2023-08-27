@@ -100,7 +100,7 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
         progressCount = progressCount + 1
       }
 
-      const multipartRes = await Promise.all(multipartPromises)
+      let multipartRes = await Promise.all(multipartPromises)
 
       while (multipartError.length > 0) {
         const jIndex = multipartError[0].address
@@ -132,15 +132,15 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
           })
 
         console.log(multipartPromises)
-        await Promise.all(multipartPromises)
+        multipartRes = await Promise.all(multipartPromises)
         multipartError.shift()
       }
       const etags = []
       for (let j = 0; j < multipartRes.length; j += 1) {
         etags.push(
-          multipartRes[j].headers.etag.substring(
+          multipartRes[j]?.headers?.etag?.substring(
             1,
-            multipartRes[j].headers.etag.length - 1
+            multipartRes[j]?.headers?.etag?.length - 1
           )
         )
       }
