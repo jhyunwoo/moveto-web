@@ -113,7 +113,7 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
           }),
         })
         const urlInfo = await uploadUrl.json()
-        const reupload = await axios
+        multipartPromises[jIndex] = axios
           .put(urlInfo, chunks[multipartError[0].address], {
             onUploadProgress(progressEvent) {
               postMessage({
@@ -122,14 +122,18 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
               })
             },
           })
-          .then((e) => {
-            multipartPromises[jIndex] = e
-            multipartError.shift()
-            console.log(multipartPromises)
-          })
           .catch((e) => {
             console.log("error", e)
+            multipartError.push({
+              id: multipartError[0].id,
+              address: jIndex,
+              count: multipartError[0].count,
+            })
           })
+
+        console.log(multipartPromises)
+        await Promise.all(multipartPromises)
+        multipartError.shift()
       }
       const etags = []
       for (let j = 0; j < multipartRes.length; j += 1) {
