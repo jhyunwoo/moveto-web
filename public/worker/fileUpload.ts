@@ -99,8 +99,11 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
 
         progressCount = progressCount + 1
       }
+
       const multipartRes = await Promise.all(multipartPromises)
+
       while (multipartError.length > 0) {
+        const jIndex = multipartError[0].address
         const uploadUrl = await fetch("/api/share/file/multipart/upload", {
           method: "POST",
           body: JSON.stringify({
@@ -120,9 +123,9 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
             },
           })
           .then((e) => {
-            console.log(e)
-            multipartPromises[multipartError[0].address] = e
+            multipartPromises[jIndex] = e
             multipartError.shift()
+            console.log(multipartPromises)
           })
           .catch((e) => {
             console.log("error", e)
