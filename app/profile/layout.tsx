@@ -20,8 +20,8 @@ export default function UploadLayout({
   return (
     <section className="sm:pt-16">
       <MenuBar />
-      <ConfirmAction />
       {children}
+      <ConfirmAction />
       <Footer />
     </section>
   )
