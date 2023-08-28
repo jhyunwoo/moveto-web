@@ -125,6 +125,7 @@ export default function FileUpload() {
 
   /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
   async function finishUpload(shareId: string) {
+    setProgressValue(100)
     setProgressMessage("업로드 완료")
     const requestCode = await fetch("/api/share/file/upload", {
       method: "PUT",
@@ -137,6 +138,7 @@ export default function FileUpload() {
     setProgressUpdate([])
     if (fileInputRef.current) fileInputRef.current.value = ""
     setProgressMessage("")
+    setProgressValue(0)
   }
 
   // worker 설정 useEffect

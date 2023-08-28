@@ -16,6 +16,7 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
   let uploadPromises: Promise<any>[] = []
   /** Progress Value 계산을 위한 Progress 위치 특정용 변수 */
   let progressCount = 0
+  /** Error 로그 */
   let errorList: {
     id: number
     uploadUrl: string
