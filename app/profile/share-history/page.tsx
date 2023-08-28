@@ -8,7 +8,7 @@ import DeleteShare from "./DeleteShare"
 import { useSession } from "next-auth/react"
 import useShares from "@/lib/useShares"
 
-export default function sharesData() {
+export default function SharesData() {
   const { data: session, status } = useSession()
   const {
     sharesData,
