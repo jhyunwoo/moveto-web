@@ -9,6 +9,8 @@ export async function GET(
 ) {
   const session = getServerSession(authOptions)
   if (!session) return NextResponse.json({ message: "Access Denied" })
+  const { searchParams } = new URL(request.url)
+  const page = Number(searchParams.get("page"))
 
   try {
     const shareHistory = await prisma.shares.findMany({
@@ -18,8 +20,15 @@ export async function GET(
       orderBy: {
         updated: "desc",
       },
+      take: 50,
+      skip: 50 * (page - 1),
     })
-    return NextResponse.json(shareHistory)
+    const shareLength = await prisma.shares.count({
+      where: {
+        userId: params.userId,
+      },
+    })
+    return NextResponse.json({ data: shareHistory, length: shareLength })
   } catch {
     return NextResponse.json({ message: "Can not find share history" })
   }

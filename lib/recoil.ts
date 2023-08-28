@@ -20,4 +20,15 @@ const loadingState = atom({
   default: false,
 })
 
-export { accessCode, alertState, loadingState, alertWithLinkState }
+const confirmActionState = atom({
+  key: "confirmActionState",
+  default: { message: "", action: () => {} },
+})
+
+export {
+  accessCode,
+  alertState,
+  loadingState,
+  alertWithLinkState,
+  confirmActionState,
+}

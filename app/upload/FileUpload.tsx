@@ -201,6 +201,11 @@ export default function FileUpload() {
 
   // 입력 받은 파일 크기 합 구하는 useEffect
   useEffect(() => setTotalFileSize(getTotalFileSize(files)), [files])
+  useEffect(() => {
+    if (progressValue > 0) {
+      setLoading(false)
+    }
+  }, [progressValue])
 
   return (
     <div className="mt-2 flex w-full flex-col dark:text-white">

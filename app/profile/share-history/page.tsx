@@ -6,18 +6,18 @@ import { nanoid } from "nanoid"
 import Link from "next/link"
 import DeleteShare from "./DeleteShare"
 import { useSession } from "next-auth/react"
-import useSWR from "swr"
+import useShares from "@/lib/useShares"
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
-export default function ShareHistory() {
+export default function sharesData() {
   const { data: session, status } = useSession()
   const {
-    data: shareHistory,
-    error,
-    isLoading,
-    mutate,
-  } = useSWR(`/api/share/user/${session?.user.id}`, fetcher)
+    sharesData,
+    page,
+    setPage,
+    sharesMutate,
+    sharesLength,
+    sharesLoading,
+  } = useShares()
 
   function korDate(date: Date) {
     const sharedDate = new Date(date)
@@ -56,7 +56,17 @@ export default function ShareHistory() {
       </div>
       <div className="mt-4 text-xl font-bold">공유 기록</div>
       <div className="flex flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900">
-        {shareHistory?.map((data: any) => (
+        {sharesLoading && (
+          <div className="flex flex-col space-y-2">
+            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+          </div>
+        )}
+        {sharesData?.map((data: any) => (
           <section
             className="flex w-full flex-col items-start justify-center border-t-2 p-1 dark:border-slate-500"
             key={nanoid()}
@@ -77,22 +87,42 @@ export default function ShareHistory() {
             )}
             <div className="break-words text-sm">{korDate(data.updated)}</div>
             {data.accessCode ? (
-              <div className="ml-auto flex space-x-1">
+              <div className="ml-auto flex items-center space-x-2">
                 <Link
                   href={`/?code=${data.accessCode.replace(" ", "_")}`}
                   className=" break-words rounded-md bg-green-700 p-1 px-2 font-semibold text-white transition duration-200 hover:bg-green-600 hover:shadow-md"
                 >
                   {data.accessCode}
                 </Link>
-                <DeleteShare id={data.id} mutate={mutate} />
+                <DeleteShare id={data.id} mutate={sharesMutate} />
               </div>
             ) : (
-              <div className="ml-auto text-red-500 dark:text-red-400">
-                만료됨
+              <div className="ml-auto flex items-center space-x-2">
+                <div className="text-red-500 dark:text-red-400">만료됨</div>
+                <DeleteShare id={data.id} mutate={sharesMutate} />
               </div>
             )}
           </section>
         ))}
+        <div className="mt-4 flex w-full items-center justify-end space-x-2">
+          {page > 1 && (
+            <button
+              onClick={() => setPage((prev) => prev - 1)}
+              className="rounded-md bg-green-500 p-1 px-2 text-white dark:bg-green-600"
+            >
+              이전
+            </button>
+          )}
+          <div className="text-lg font-semibold">{page}</div>
+          {Math.ceil(sharesLength / 50) !== page && (
+            <button
+              onClick={() => setPage((prev) => prev + 1)}
+              className="rounded-md bg-green-500 p-1 px-2 text-white dark:bg-green-600"
+            >
+              다음
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

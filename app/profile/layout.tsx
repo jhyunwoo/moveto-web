@@ -1,3 +1,4 @@
+import ConfirmAction from "@/components/ConfirmAction"
 import Footer from "@/components/Footer"
 import MenuBar from "@/components/MenuBar"
 import { Metadata } from "next"
@@ -19,6 +20,7 @@ export default function UploadLayout({
   return (
     <section className="sm:pt-16">
       <MenuBar />
+      <ConfirmAction />
       {children}
       <Footer />
     </section>
