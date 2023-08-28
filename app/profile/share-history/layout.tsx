@@ -1,4 +1,7 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { Metadata } from "next"
+import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "모베토 | 공유 기록",
@@ -9,10 +12,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function UploadLayout({
+export default async function UploadLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await getServerSession(authOptions)
+  if (!session) redirect("/auth/signin")
+
   return <section>{children}</section>
 }

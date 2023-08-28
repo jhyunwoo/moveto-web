@@ -118,13 +118,11 @@ export default function FileUpload() {
 
     // worker에 업로드 요청
     handleWorker({ shareId: result.id })
-    setTimeout(() => {
-      setLoading(false)
-    }, 3000)
   }
 
   /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
   async function finishUpload(shareId: string) {
+    setLoading(false)
     setProgressValue(100)
     setProgressMessage("업로드 완료")
     const requestCode = await fetch("/api/share/file/upload", {
