@@ -19,7 +19,7 @@ export default function ConfirmAction() {
           </div>
           <div className="flex w-full justify-around space-x-2">
             <button
-              className="w-full rounded-lg bg-green-600 p-1 px-2 transition duration-200 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-400"
+              className="w-full rounded-lg bg-green-600 p-1 px-2 text-white transition duration-200 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-400"
               onClick={() =>
                 setConfirmAction({ message: "", action: () => {} })
               }
