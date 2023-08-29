@@ -1,180 +1,55 @@
-import axios from "axios"
-
-type FileInput = {
+type UploadType = {
   files: File[]
   shareId: string
 }
 
-const onemb = 1024 * 1024
+const ONEMB = 1024 * 1024
+const ONEGB = ONEMB * 1024
 
-self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
-  /** 요청에서 받아온 파일 데이터 */
+addEventListener("message", async (event: MessageEvent<UploadType>) => {
   const files = event.data.files
-  /** 생성한 share id */
   const shareId = event.data.shareId
-  /** 병렬 다운로드를 위한 Promise 배열 */
-  let uploadPromises: Promise<any>[] = []
-  /** Progress Value 계산을 위한 Progress 위치 특정용 변수 */
-  let progressCount = 0
-  /** Error 로그 */
-  let errorList: {
-    id: number
-    uploadUrl: string
-    count: number
-  }[] = []
+  const singleUploads: File[] = []
+  const smallUploads: File[] = []
+  const middleUploads: File[] = []
+  const largeUploads: File[] = []
 
   for (let i = 0; i < files.length; i += 1) {
-    if (files[i].size < 110 * onemb) {
-      let currentCount = progressCount
-      const requestSingleUploadUrl = await fetch("/api/share/file/upload", {
-        method: "POST",
-        body: JSON.stringify({
-          fileInfo: { name: files[i].name, type: files[i].type },
-          shareInfo: shareId,
-        }),
-      })
-      const uploadUrl = await requestSingleUploadUrl.json()
-
-      uploadPromises.push(
-        axios
-          .put(uploadUrl, files[i], {
-            onUploadProgress(progressEvent) {
-              postMessage({ id: currentCount, uploaded: progressEvent.loaded })
-            },
-          })
-          .catch(() => {
-            errorList.push({
-              id: i,
-              uploadUrl: uploadUrl,
-              count: currentCount,
-            })
-          })
-      )
-      progressCount = progressCount + 1
-    } else {
-      let chunks = []
-      let start = 0
-      let end = 110 * onemb
-      let multipartError: { id: number; address: number; count: number }[] = []
-
-      while (start < files[i].size) {
-        chunks.push(files[i].slice(start, end))
-        start = end
-        end = start + 110 * onemb
-      }
-      const createMultipart = await fetch("/api/share/file/multipart/start", {
-        method: "POST",
-        body: JSON.stringify({
-          fileKey: shareId + "/" + files[i].name,
-        }),
-      })
-      const multipartInfo = await createMultipart.json()
-
-      const uploadId = multipartInfo.UploadId
-      let multipartPromises: any[] = []
-
-      for (let j = 0; j < chunks.length; j += 1) {
-        let currentCount = progressCount
-        const uploadUrl = await fetch("/api/share/file/multipart/upload", {
-          method: "POST",
-          body: JSON.stringify({
-            fileKey: shareId + "/" + files[i].name,
-            uploadId: uploadId,
-            index: j + 1,
-          }),
-        })
-        const urlInfo = await uploadUrl.json()
-
-        multipartPromises.push(
-          axios
-            .put(urlInfo, chunks[j], {
-              onUploadProgress(progressEvent) {
-                postMessage({
-                  id: currentCount,
-                  uploaded: progressEvent.loaded,
-                })
-              },
-            })
-            .catch((e) => {
-              multipartError.push({ id: i, address: j, count: currentCount })
-            })
-        )
-
-        progressCount = progressCount + 1
-      }
-
-      let multipartRes = await Promise.all(multipartPromises)
-
-      while (multipartError.length > 0) {
-        const jIndex = multipartError[0].address
-        const uploadUrl = await fetch("/api/share/file/multipart/upload", {
-          method: "POST",
-          body: JSON.stringify({
-            fileKey: shareId + "/" + files[multipartError[0].id].name,
-            uploadId: uploadId,
-            index: multipartError[0].address + 1,
-          }),
-        })
-        const urlInfo = await uploadUrl.json()
-        multipartPromises[jIndex] = axios
-          .put(urlInfo, chunks[multipartError[0].address], {
-            onUploadProgress(progressEvent) {
-              postMessage({
-                id: multipartError[0].count,
-                uploaded: progressEvent.loaded,
-              })
-            },
-          })
-          .catch((e) => {
-            multipartError.push({
-              id: multipartError[0].id,
-              address: jIndex,
-              count: multipartError[0].count,
-            })
-          })
-
-        multipartRes = await Promise.all(multipartPromises)
-        multipartError.shift()
-      }
-      const etags = []
-      for (let j = 0; j < multipartRes.length; j += 1) {
-        etags.push(
-          multipartRes[j]?.headers?.etag?.substring(
-            1,
-            multipartRes[j]?.headers?.etag?.length - 1
-          )
-        )
-      }
-
-      await fetch("/api/share/file/multipart/complete", {
-        method: "POST",
-        body: JSON.stringify({
-          fileKey: shareId + "/" + files[i].name,
-          uploadId: uploadId,
-          uploadResults: etags,
-        }),
-      })
+    const fileSize = files[i].size
+    if (fileSize < 10 * ONEMB) {
+      singleUploads.push(files[i])
+    } else if (fileSize < 50 * ONEMB) {
+      smallUploads.push(files[i])
+    } else if (fileSize < 400 * ONEGB) {
+      middleUploads.push(files[i])
+    } else if (fileSize < 1024 * ONEGB) {
+      largeUploads.push(files[i])
     }
   }
 
-  const res = await Promise.all(uploadPromises)
-
-  while (errorList.length > 0) {
-    const reupload = await axios.put(
-      errorList[0].uploadUrl,
-      files[errorList[0].id],
-      {
-        onUploadProgress(progressEvent) {
-          postMessage({
-            id: errorList[0].count,
-            uploaded: progressEvent.loaded,
-          })
-        },
-      }
-    )
-    if (reupload) {
-      errorList.shift()
+  const smallChunks = []
+  for (let i = 0; i < smallUploads.length; i += 1) {
+    let chunks = []
+    let start = 0
+    let end = 10 * ONEMB
+    while (start < smallUploads[i].size) {
+      chunks.push(smallUploads[i].slice(start, end))
+      start = end
+      end = start + 10 * ONEMB
     }
+    smallChunks.push(chunks)
   }
-  self.postMessage({ message: "upload complete", shareId: event.data.shareId })
+
+  const middleChunks = []
+  for (let i = 0; i < middleUploads.length; i += 1) {
+    let chunks = []
+    let start = 0
+    let end = 50 * ONEMB
+    while (start < middleUploads[i].size) {
+      chunks.push(middleUploads[i].slice(start, end))
+      start = end
+      end = start + 10 * ONEMB
+    }
+    middleChunks.push(chunks)
+  }
 })
