@@ -42,8 +42,7 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
               postMessage({ id: currentCount, uploaded: progressEvent.loaded })
             },
           })
-          .catch((e) => {
-            console.log(e)
+          .catch(() => {
             errorList.push({
               id: i,
               uploadUrl: uploadUrl,
@@ -161,8 +160,6 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
   const res = await Promise.all(uploadPromises)
 
   while (errorList.length > 0) {
-    console.log(errorList)
-
     const reupload = await axios.put(
       errorList[0].uploadUrl,
       files[errorList[0].id],
@@ -176,7 +173,6 @@ self.addEventListener("message", async (event: MessageEvent<FileInput>) => {
       }
     )
     if (reupload) {
-      console.log(reupload)
       errorList.shift()
     }
   }

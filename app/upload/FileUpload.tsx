@@ -142,16 +142,11 @@ export default function FileUpload() {
   // worker 설정 useEffect
   useEffect(() => {
     workerRef.current = new Worker(
-      new URL("public/worker/fileUpload.ts", import.meta.url)
+      new URL("worker/fileUpload.ts", import.meta.url)
     )
     workerRef.current.onmessage = (event: MessageEvent<any>) => {
       if (event.data.message === "upload complete") {
         finishUpload(event.data.shareId)
-      } else if (event.data.message === "upload error") {
-        setAlert({ message: "업로드 오류", error: true, warn: false })
-        setProgress([])
-        setProgressUpdate([])
-        setProgressValue(0)
       } else {
         setProgressUpdate([...progressUpdate, event.data])
       }

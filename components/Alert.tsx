@@ -1,13 +1,12 @@
 "use client"
 
 import { alertState } from "@/lib/recoil"
-import { XCircleIcon } from "@heroicons/react/24/outline"
-import { useRecoilValue, useResetRecoilState } from "recoil"
+import { useRecoilValue, useSetRecoilState } from "recoil"
 import PopUpLayout from "./PopUpLayout"
 
 export default function Alert() {
   const alertInfo = useRecoilValue(alertState)
-  const resetAlert = useResetRecoilState(alertState)
+  const setAlert = useSetRecoilState(alertState)
 
   return (
     <>
@@ -25,7 +24,9 @@ export default function Alert() {
             </div>
             <button
               type="button"
-              onClick={resetAlert}
+              onClick={() =>
+                setAlert({ message: "", warn: false, error: false })
+              }
               className="w-full max-w-xs rounded-md bg-green-600 p-1 px-2  text-white transition duration-200 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400"
             >
               확인

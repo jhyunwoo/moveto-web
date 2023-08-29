@@ -18,12 +18,10 @@ export default function DeleteShare({
   async function deleteShare(shareId: string) {
     setLoading(true)
     try {
-      const requestDelete = await fetch("/api/share/user", {
+      await fetch("/api/share/user", {
         method: "DELETE",
         body: JSON.stringify({ id: shareId }),
       })
-      const result = await requestDelete.json()
-      console.log(result)
       setLoading(false)
       setAlert({ message: "삭제를 완료했습니다.", warn: true, error: false })
     } catch {
