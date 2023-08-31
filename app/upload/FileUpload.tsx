@@ -99,23 +99,6 @@ export default function FileUpload() {
     })
     const result = await createShare.json()
 
-    /** 파일 업로드 분할 개수 구하는 함수 */
-    function getFileUploadChunkList() {
-      let count = 0
-      for (let i = 0; i < files.length; i += 1) {
-        if (files[i].size < 110 * ONEMB) {
-          count = count += 1
-        } else {
-          count = count + Math.ceil(files[i].size / (110 * ONEMB))
-        }
-      }
-      return count
-    }
-
-    /** progress 추적을 위한 기본 값 세팅 */
-    const progressList = new Array(getFileUploadChunkList()).fill(0)
-    setProgress(progressList)
-
     // worker에 업로드 요청
     handleWorker({ shareId: result.id })
   }
@@ -145,6 +128,11 @@ export default function FileUpload() {
       new URL("worker/fileUpload.ts", import.meta.url)
     )
     workerRef.current.onmessage = (event: MessageEvent<any>) => {
+      if (event.data.length) {
+        /** progress 추적을 위한 기본 값 세팅 */
+        const progressList = new Array(event.data.length).fill(0)
+        setProgress(progressList)
+      }
       if (event.data.message === "upload complete") {
         finishUpload(event.data.shareId)
       } else {

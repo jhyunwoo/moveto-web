@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     uploadResults,
   }: { fileKey: string; uploadId: string; uploadResults: string[] } =
     requestData
+  console.log(fileKey, uploadId, uploadResults)
 
   const S3 = new S3Client({
     region: "auto",
