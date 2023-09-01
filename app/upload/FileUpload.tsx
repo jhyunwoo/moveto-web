@@ -128,6 +128,9 @@ export default function FileUpload() {
       new URL("worker/fileUpload.ts", import.meta.url)
     )
     workerRef.current.onmessage = (event: MessageEvent<any>) => {
+      if (event.data.message === "error") {
+        console.log(event.data.log)
+      }
       if (event.data.length) {
         /** progress 추적을 위한 기본 값 세팅 */
         const progressList = new Array(event.data.length).fill(0)
