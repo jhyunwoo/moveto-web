@@ -77,6 +77,9 @@ dependencies:
   recoil:
     specifier: ^0.7.7
     version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
+  request-ip:
+    specifier: ^3.3.0
+    version: 3.3.0
   swr:
     specifier: ^2.2.2
     version: 2.2.2(react@18.2.0)
@@ -5988,6 +5991,10 @@ packages:
 
   /reinterval@1.1.0:
     resolution: {integrity: sha512-QIRet3SYrGp0HUHO88jVskiG6seqUGC5iAG7AwI/BV4ypGcuqk9Du6YQBUOUqm9c8pw1eyLoIaONifRua1lsEQ==}
+    dev: false
+
+  /request-ip@3.3.0:
+    resolution: {integrity: sha512-cA6Xh6e0fDBBBwH77SLJaJPBmD3nWVAcF9/XAcsrIHdjhFzFiB5aNQFytdjCGPezU3ROwrR11IddKAM08vohxA==}
     dev: false
 
   /require-from-string@2.0.2:

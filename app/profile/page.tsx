@@ -6,6 +6,7 @@ import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import SignOut from "./SignOut"
 import { ReactNode } from "react"
+import { headers } from "next/headers"
 
 export const metadata: Metadata = {
   title: "모베토 | 프로필",
@@ -51,6 +52,7 @@ export default async function User() {
 
   if (!session) redirect("/auth/signin")
 
+  const ip = headers().get("x-forwarded-for")
   return (
     <div className="min-h-screen w-full p-4 pb-24 dark:text-white">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -66,10 +68,11 @@ export default async function User() {
               {session.user?.plan}
             </div>
           </div>
-          <div className="flex items-center space-x-1 pb-6 ">
+          <div className="flex items-center space-x-1 ">
             <EnvelopeIcon className="h-5 w-5 text-slate-800 dark:text-slate-200" />
             <div>{session.user?.email}</div>
           </div>
+          <div className="py-1 text-sm">{ip ? ip : "IP ADDRESS"}</div>
           <SignOut />
         </div>
         <Link
