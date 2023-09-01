@@ -18,7 +18,7 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
 
   for (let i = 0; i < files.length; i += 1) {
     const fileSize = files[i].size
-    if (fileSize < 10 * ONEMB) {
+    if (fileSize < 50 * ONEMB) {
       singleUploads.push(files[i])
     } else if (fileSize < 90 * ONEGB) {
       smallUploads.push(files[i])
