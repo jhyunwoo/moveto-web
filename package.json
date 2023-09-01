@@ -12,9 +12,9 @@
     "studio": "pnpm prisma studio"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.377.0",
-    "@aws-sdk/s3-request-presigner": "^3.377.0",
-    "@aws-sdk/signature-v4-crt": "^3.370.0",
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@aws-sdk/s3-request-presigner": "^3.400.0",
+    "@aws-sdk/signature-v4-crt": "^3.398.0",
     "@ducanh2912/next-pwa": "^9.4.0",
     "@heroicons/react": "^2.0.18",
     "@next-auth/prisma-adapter": "^1.0.7",
