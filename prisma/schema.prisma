@@ -70,7 +70,8 @@ model shares {
   user       User?    @relation(fields: [userId], references: [id])
   userId     String?
   files      String[]
-  link       String?
+  text       String?
+  isLink     Boolean?
   accessCode String?  @unique
   updated    DateTime @default(now())
   created    DateTime @default(now())

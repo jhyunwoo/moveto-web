@@ -25,7 +25,8 @@ export default function SearchFile() {
 
   const [fileNames, setFileNames] = useState<string[]>([])
   const [fileUrl, setFileUrl] = useState<string[]>([])
-  const [link, setLink] = useState("")
+  const [text, setText] = useState("")
+  const [isLink, setIsLink] = useState(false)
 
   const setAlert = useSetRecoilState(alertState)
   const setLoading = useSetRecoilState(loadingState)
@@ -62,10 +63,11 @@ export default function SearchFile() {
 
         setFileUrl(signedUrl.urls)
         setFileNames(shareInfo.share.files)
-        setLink("")
-      } else if (shareInfo.share.link) {
+        setText("")
+      } else if (shareInfo.share.text) {
         setFileNames([])
-        setLink(shareInfo.share.link)
+        setText(shareInfo.share.text)
+        setIsLink(shareInfo.share.isLink)
       }
       setLoading(false)
     } else {
@@ -105,10 +107,11 @@ export default function SearchFile() {
 
         setFileUrl(signedUrl.urls)
         setFileNames(shareInfo.share.files)
-        setLink("")
-      } else if (shareInfo.share.link) {
+        setText("")
+      } else if (shareInfo.share.text) {
         setFileNames([])
-        setLink(shareInfo.share.link)
+        setText(shareInfo.share.text)
+        setIsLink(shareInfo.share.isLink)
       }
       setLoading(false)
     }
@@ -136,17 +139,26 @@ export default function SearchFile() {
       {errors.accessCode && (
         <div className="mt-1 text-red-500">{errors.accessCode.message}</div>
       )}
-      {link ? (
-        <div className="mt-4 w-full">
-          <div className="text-xl font-semibold">공유된 링크</div>
-          <a
-            target="_blank"
-            href={link}
-            className="break-words text-lg font-semibold text-blue-700 transition duration-100 hover:text-indigo-700 hover:underline"
-          >
-            {link}
-          </a>
-        </div>
+      {text ? (
+        isLink ? (
+          <div className="mt-4 w-full">
+            <div className="text-xl font-semibold">공유된 링크</div>
+            <a
+              target="_blank"
+              href={text}
+              className="break-words text-lg font-semibold text-blue-700 transition duration-100 hover:text-indigo-700 hover:underline"
+            >
+              {text}
+            </a>
+          </div>
+        ) : (
+          <div className="mt-4 w-full">
+            <div className="text-xl font-semibold">공유된 텍스트</div>
+            <div className="mt-1 break-words rounded-md bg-slate-100 p-2 text-lg font-semibold transition duration-100 dark:bg-slate-700  ">
+              {text}
+            </div>
+          </div>
+        )
       ) : (
         ""
       )}

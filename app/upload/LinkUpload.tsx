@@ -2,12 +2,13 @@
 
 import { useForm, SubmitHandler } from "react-hook-form"
 import { useSetRecoilState } from "recoil"
-import { accessCode, loadingState } from "@/lib/recoil"
+import { accessCode, alertState, loadingState } from "@/lib/recoil"
 import { useSession } from "next-auth/react"
 import getShareTime from "@/lib/getShareTime"
 
 type Inputs = {
-  link: string
+  text: string
+  isLink: Boolean
 }
 
 export default function LinkUpload() {
@@ -15,31 +16,32 @@ export default function LinkUpload() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<Inputs>({ mode: "onBlur" })
 
   const { data: session } = useSession()
 
   const setAccessCode = useSetRecoilState(accessCode)
   const setLoading = useSetRecoilState(loadingState)
+  const setAlert = useSetRecoilState(alertState)
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log(data)
     setLoading(true)
     const createShare = await fetch("/api/share/link", {
       method: "POST",
-      body: JSON.stringify({ link: data.link }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      body: JSON.stringify({ text: data.text, isLink: data.isLink }),
     })
     const shareInfo = await createShare.json()
+    console.log(shareInfo)
     const requestCode = await fetch("/api/share/file/upload", {
       method: "PUT",
-      body: JSON.stringify({ shareId: shareInfo.result.id }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      body: JSON.stringify({ shareId: shareInfo.id }),
     })
     const createCode = await requestCode.json()
+    if (createCode.result === "error") {
+      setAlert({ message: "텍스트 공유 실패", warn: false, error: true })
+    }
     setAccessCode(createCode.result.accessCode)
     setLoading(false)
   }
@@ -51,17 +53,38 @@ export default function LinkUpload() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <input
-          placeholder="https://moveto.kr"
+          placeholder={watch("isLink") ? "Link" : "Text"}
           className="w-full break-words rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none dark:bg-slate-800"
-          {...register("link", {
-            required: { value: true, message: "링크를 입력하세요." },
+          {...register("text", {
+            required: {
+              value: true,
+              message: watch("isLink")
+                ? "링크를 입력하세요."
+                : "텍스트를 입력하세요.",
+            },
           })}
         />
-        {errors.link && (
-          <div className="mr-auto mt-1 text-sm font-medium text-red-500 dark:text-red-400">
-            {errors.link.message}
+        <div className="flex w-full justify-between">
+          <div
+            className={`mr-auto mt-1 text-sm font-medium text-red-500 dark:text-red-400 ${
+              !errors.text?.message && "invisible"
+            }`}
+          >
+            {errors.text?.message}
           </div>
-        )}
+
+          <label className="relative inline-flex cursor-pointer items-center">
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              {...register("isLink")}
+            />
+            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"></div>
+            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              링크로 공유
+            </span>
+          </label>
+        </div>
         <button
           type="submit"
           className="w-full rounded-lg bg-green-600 p-1 px-2 font-semibold text-white transition duration-150 hover:bg-green-700 sm:p-2"

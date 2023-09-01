@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   const requestData = await request.json()
-  const { link } = requestData
+  const { text, isLink } = requestData
 
   const session = await getServerSession(authOptions)
 
@@ -17,16 +17,18 @@ export async function POST(request: Request) {
         user: {
           connect: { id: session.user.id },
         },
-        link: link,
+        text: text,
+        isLink: isLink,
       },
     })
   } else {
     createLink = await prisma.shares.create({
       data: {
-        link: link,
+        text: text,
+        isLink: isLink,
       },
     })
   }
 
-  return NextResponse.json({ result: createLink })
+  return NextResponse.json(createLink)
 }
