@@ -52,18 +52,29 @@ export default function LinkUpload() {
         className="mt-1 flex w-full flex-col items-center justify-center space-y-2"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <input
-          placeholder={watch("isLink") ? "Link" : "Text"}
-          className="w-full break-words rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none dark:bg-slate-800"
-          {...register("text", {
-            required: {
-              value: true,
-              message: watch("isLink")
-                ? "링크를 입력하세요."
-                : "텍스트를 입력하세요.",
-            },
-          })}
-        />
+        {watch("isLink") ? (
+          <input
+            placeholder={"Link"}
+            className="mb-6 w-full break-words rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none dark:bg-slate-800"
+            {...register("text", {
+              required: {
+                value: true,
+                message: "링크를 입력하세요.",
+              },
+            })}
+          />
+        ) : (
+          <textarea
+            placeholder={"Text"}
+            className="h-18 w-full break-words rounded-lg border-2 border-green-600 p-1 px-2 text-base font-semibold outline-none dark:bg-slate-800"
+            {...register("text", {
+              required: {
+                value: true,
+                message: "텍스트를 입력하세요.",
+              },
+            })}
+          />
+        )}
         <div className="flex w-full justify-between">
           <div
             className={`mr-auto mt-1 text-sm font-medium text-red-500 dark:text-red-400 ${
@@ -79,7 +90,7 @@ export default function LinkUpload() {
               className="peer sr-only"
               {...register("isLink")}
             />
-            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"></div>
+            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:border-slate-600 dark:bg-slate-700 dark:peer-checked:bg-green-400 dark:peer-focus:ring-green-800"></div>
             <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
               링크로 공유
             </span>
