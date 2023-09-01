@@ -39,7 +39,7 @@ export default function Upload() {
                 : "bg-white text-black dark:bg-slate-700 dark:text-white"
             }  w-full rounded-full p-1 font-semibold transition duration-100`}
           >
-            링크 공유
+            텍스트 공유
           </button>
         </div>
         {share === "File" ? <FileUpload /> : <LinkUpload />}

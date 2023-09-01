@@ -44,7 +44,7 @@ export default function Home() {
       <div className="flex min-h-screen w-full flex-col items-center justify-center p-8 dark:text-white sm:pt-16">
         <MenuBar />
         <div className="flex w-full max-w-xl flex-col items-center justify-center">
-          <div className="mr-auto pb-1 pl-1 text-xl font-bold dark:text-white">
+          <div className="mr-auto pb-1 pl-1 text-xl font-semibold dark:text-white">
             접근 코드
           </div>
           <SearchFile />

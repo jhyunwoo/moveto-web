@@ -78,12 +78,20 @@ export default function SharesData() {
                   ? ""
                   : `외 ${data.files.length - 1}개의 파일`}
               </div>
-            ) : (
-              <Link className="w-full" href={data?.link ? data.link : ""}>
+            ) : data.isLink ? (
+              <a
+                target="_blank"
+                className="w-full"
+                href={data?.text ? data.text : ""}
+              >
                 <div className="break-words font-semibold text-blue-600 decoration-blue-600 hover:underline">
-                  {data.link}
+                  {data.text}
                 </div>
-              </Link>
+              </a>
+            ) : (
+              <div className="mb-1 break-words rounded-md bg-slate-100 p-1 px-2 font-semibold dark:bg-slate-800">
+                {data.text}
+              </div>
             )}
             <div className="break-words text-sm">{korDate(data.updated)}</div>
             {data.accessCode ? (
@@ -114,13 +122,16 @@ export default function SharesData() {
             </button>
           )}
           <div className="text-lg font-semibold">{page}</div>
-          {Math.ceil(sharesLength / 50) !== page && (
+          {(Math.ceil(sharesLength / 50) !== page || sharesLength !== 0) &&
+          Math.ceil(sharesLength / 50) !== 1 ? (
             <button
               onClick={() => setPage((prev) => prev + 1)}
               className="rounded-md bg-green-500 p-1 px-2 text-white dark:bg-green-600"
             >
               다음
             </button>
+          ) : (
+            ""
           )}
         </div>
       </div>
