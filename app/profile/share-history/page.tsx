@@ -109,6 +109,7 @@ export default function SharesData() {
                 <div className="text-green-600 dark:text-green-400 ">
                   업로드 중...
                 </div>
+                <DeleteShare id={data.id} mutate={sharesMutate} />
               </div>
             ) : (
               <div className="ml-auto flex items-center space-x-2">
