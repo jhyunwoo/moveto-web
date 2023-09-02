@@ -52,7 +52,7 @@ export default async function User() {
 
   if (!session) redirect("/auth/signin")
 
-  const ip = headers().get("x-forwarded-for")
+  // const ip = headers().get("x-forwarded-for")
   return (
     <div className="min-h-screen w-full p-4 pb-24 dark:text-white">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -72,7 +72,6 @@ export default async function User() {
             <EnvelopeIcon className="h-5 w-5 text-slate-800 dark:text-slate-200" />
             <div>{session.user?.email}</div>
           </div>
-          <div className="py-1 text-sm">{ip ? ip : "IP ADDRESS"}</div>
           <SignOut />
         </div>
         <Link
