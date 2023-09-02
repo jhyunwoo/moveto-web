@@ -26,7 +26,6 @@ export default function LinkUpload() {
   const setAlert = useSetRecoilState(alertState)
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(data)
     setLoading(true)
     const createShare = await fetch("/api/share/link", {
       method: "POST",

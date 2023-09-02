@@ -172,7 +172,7 @@ export default function SearchFile() {
                 key={nanoid()}
                 className="flex w-full items-center justify-between border-t-2 p-2 dark:border-slate-500"
               >
-                <div className="basis-5/6 break-words text-sm">{data}</div>
+                <div className="basis-5/6 break-all pr-1 text-sm">{data}</div>
                 <FileDownloadButton
                   url={fileUrl[key]}
                   filename={fileNames[key]}

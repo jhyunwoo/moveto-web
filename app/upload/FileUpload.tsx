@@ -181,7 +181,7 @@ export default function FileUpload() {
             className="flex items-center justify-between border-t-2 dark:border-slate-500"
           >
             <div className="flex flex-col justify-center text-sm font-semibold">
-              <div className="break-words">{data.name}</div>
+              <div className="break-all">{data.name}</div>
               <div>({formatBytes(data.size)})</div>
             </div>
             <button
@@ -199,7 +199,7 @@ export default function FileUpload() {
           <div className="h-7 w-full animate-pulse rounded-md bg-slate-200 text-lg font-semibold dark:bg-slate-700" />
         ) : (
           <div className="text-lg font-semibold">
-            {session?.user.plan ? session.user.plan : "Guest"} Plan
+            {session?.user.plan ? session.user.plan + " Plan" : "Guest"}
           </div>
         )}
         <div className="ml-auto mt-2 text-sm">
