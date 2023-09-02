@@ -140,8 +140,8 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
     /** 에러 정보 저장 */
     const errorList: { id: number; count: number }[] = []
 
-    // 첫 10개의 singleUpload 파엘에 대한 이름과 타입 데이터 singleFileInfo에 저장
-    for (let i = 0; i < 10; i += 1) {
+    // 첫 100개의 singleUpload 파엘에 대한 이름과 타입 데이터 singleFileInfo에 저장
+    for (let i = 0; i < 100; i += 1) {
       if (!singleUploads[i]) break
       singleFileInfo.push({
         name: singleUploads[i].name,
@@ -199,8 +199,8 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
       res = await Promise.all(uploadPromise)
     }
 
-    // 첫 10개의 파일 삭제
-    singleUploads.splice(0, 10)
+    // 첫 100개의 파일 삭제
+    singleUploads.splice(0, 100)
   }
 
   // small mulitpart upload
