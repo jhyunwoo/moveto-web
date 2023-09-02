@@ -4,7 +4,10 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   const requestData = await request.json()
-  const { fileKey, uploadId, index } = requestData
+  const {
+    chunkInfos,
+  }: { chunkInfos: { fileKey: string; uploadId: string; index: number }[] } =
+    requestData
 
   const S3 = new S3Client({
     region: "auto",
@@ -14,20 +17,23 @@ export async function POST(request: Request) {
       secretAccessKey: process.env.R2_PRIVITEKEY!,
     },
   })
+  const signedUrls: string[] = []
+  for (let i = 0; i < chunkInfos.length; i += 1) {
+    const command = new UploadPartCommand({
+      Bucket: "moveto-bucket",
+      Key: chunkInfos[i].fileKey,
+      UploadId: chunkInfos[i].uploadId,
+      PartNumber: chunkInfos[i].index,
+    })
 
-  const command = new UploadPartCommand({
-    Bucket: "moveto-bucket",
-    Key: fileKey,
-    UploadId: uploadId,
-    PartNumber: index,
-  })
-
-  const signedUrl = await getSignedUrl(S3, command, { expiresIn: 3600 })
+    const signedUrl = await getSignedUrl(S3, command, { expiresIn: 3600 })
+    signedUrls.push(signedUrl)
+  }
 
   const newHeaders = new Headers(request.headers)
   // Add a new header
   newHeaders.set("Access-Control-Allow-Credentials", "true")
-  return new NextResponse(JSON.stringify(signedUrl), {
+  return new NextResponse(JSON.stringify(signedUrls), {
     status: 200,
     headers: { "Access-Control-Allow-Credentials": "true" },
   })

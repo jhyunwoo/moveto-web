@@ -1,13 +1,7 @@
 "use client"
 
 import formatBytes from "@/lib/formatBytes"
-import React, {
-  useRef,
-  useState,
-  ChangeEvent,
-  useEffect,
-  useCallback,
-} from "react"
+import React, { useRef, useState, ChangeEvent, useEffect } from "react"
 import { nanoid } from "nanoid"
 import { TrashIcon } from "@heroicons/react/24/outline"
 import { useSetRecoilState } from "recoil"
@@ -18,8 +12,8 @@ import getShareTime from "@/lib/getShareTime"
 import getTotalFileSize from "@/lib/getTotalFileSize"
 import getFileNameList from "@/lib/getFileNameList"
 
-const ONEGB = 1024 * 1024 * 1024
 const ONEMB = 1024 * 1024
+const ONEGB = 1024 * ONEMB
 
 type ProgressUpdateType = {
   id: number
@@ -29,11 +23,9 @@ type ProgressUpdateType = {
 export default function FileUpload() {
   const { data: session, status } = useSession()
   const [files, setFiles] = useState<File[]>([])
-  const [maxFileSize, setMaxFileSize] = useState<number>(1024 * 1024 * 1024) // 1GB
+  const [maxFileSize, setMaxFileSize] = useState<number>(ONEGB) // 1GB
   const [totalFileSize, setTotalFileSize] = useState<number>(0)
-  const [progress, setProgress] = useState<number[]>([])
-  const [progressValue, setProgressValue] = useState(0)
-  const [progressUpdate, setProgressUpdate] = useState<ProgressUpdateType[]>([])
+  const [progress, setProgress] = useState(0)
   const [progressMessage, setProgressMessage] = useState("")
 
   const setAccessCode = useSetRecoilState(accessCode)
@@ -106,7 +98,7 @@ export default function FileUpload() {
   /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
   async function finishUpload(shareId: string) {
     setLoading(false)
-    setProgressValue(100)
+    setProgress(100)
     setProgressMessage("업로드 완료")
     const requestCode = await fetch("/api/share/file/upload", {
       method: "PUT",
@@ -115,11 +107,9 @@ export default function FileUpload() {
     const codeData = await requestCode.json()
     setAccessCode(codeData.result.accessCode)
     setFiles([])
-    setProgress([])
-    setProgressUpdate([])
     if (fileInputRef.current) fileInputRef.current.value = ""
     setProgressMessage("")
-    setProgressValue(0)
+    setProgress(0)
   }
 
   // worker 설정 useEffect
@@ -128,18 +118,17 @@ export default function FileUpload() {
       new URL("worker/fileUpload.ts", import.meta.url)
     )
     workerRef.current.onmessage = (event: MessageEvent<any>) => {
+      if (event.data.progress) {
+        if (event.data.progress > 0) {
+          setLoading(false)
+        }
+        setProgress(event.data.progress)
+      }
       if (event.data.message === "error") {
         console.log(event.data.log)
       }
-      if (event.data.length) {
-        /** progress 추적을 위한 기본 값 세팅 */
-        const progressList = new Array(event.data.length).fill(0)
-        setProgress(progressList)
-      }
       if (event.data.message === "upload complete") {
         finishUpload(event.data.shareId)
-      } else {
-        setProgressUpdate([...progressUpdate, event.data])
       }
     }
     return () => {
@@ -158,40 +147,8 @@ export default function FileUpload() {
     }
   }, [session])
 
-  // progress 변경시 progressValue 값 변경
-  useEffect(() => {
-    const totalSize = getTotalFileSize(files)
-    let uploadedBytes = 0
-    if (progress.length > 0) {
-      uploadedBytes = progress.reduce(function add(sum, currValue) {
-        return sum + currValue
-      }, 0)
-    }
-
-    let value = 0
-    if (totalSize !== 0) {
-      value = Number(((uploadedBytes / totalSize) * 100).toFixed(2))
-    }
-    setProgressValue(value)
-  }, [progress])
-
-  // worker에서 받은 업로드 진행 값 기반 progressUpdate 업데이트 useEffect
-  useEffect(() => {
-    if (progressUpdate.length > 0) {
-      const lastUpdate = progressUpdate.slice(-1)[0]
-      let copy = [...progress]
-      copy[lastUpdate.id] = lastUpdate.uploaded
-      setProgress(copy)
-    }
-  }, [progressUpdate])
-
   // 입력 받은 파일 크기 합 구하는 useEffect
   useEffect(() => setTotalFileSize(getTotalFileSize(files)), [files])
-  useEffect(() => {
-    if (progressValue > 0) {
-      setLoading(false)
-    }
-  }, [progressValue])
 
   return (
     <div className="mt-2 flex w-full flex-col dark:text-white">
@@ -258,8 +215,8 @@ export default function FileUpload() {
           총 {formatBytes(totalFileSize)} / 최대 {formatBytes(maxFileSize)}
         </div>
       </div>
-      {progressValue > 0 ? (
-        <Progress progress={progressValue} message={progressMessage} />
+      {progress > 0 ? (
+        <Progress progress={progress} message={progressMessage} />
       ) : (
         ""
       )}
