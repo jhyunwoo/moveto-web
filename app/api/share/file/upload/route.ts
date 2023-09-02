@@ -43,20 +43,25 @@ export async function PUT(request: Request) {
   const requestData = await request.json()
   const { shareId } = requestData
 
-  const nounList = await prisma.nouns.findMany()
-  const adjList = await prisma.adjectives.findMany()
+  const nounLength = await prisma.nouns.count()
+  const adjLength = await prisma.adjectives.count()
 
   try {
     let randomSentence = ""
 
     while (true) {
-      const adjNumber = Math.floor(Math.random() * adjList.length)
-      const nounNumber = Math.floor(Math.random() * nounList.length)
+      const nounRandom = Math.ceil(Math.random() * nounLength)
+      const adjRandom = Math.ceil(Math.random() * adjLength)
+      const nounWord = await prisma.nouns
+        .findFirst({
+          skip: nounRandom,
+        })
+        .then((event) => event?.word)
+      const adjWord = await prisma.adjectives
+        .findFirst({ skip: adjRandom })
+        .then((event) => event?.word)
 
-      const randomAdj = adjList[adjNumber].word
-      const randomNoun = nounList[nounNumber].word
-
-      randomSentence = `${randomAdj} ${randomNoun}`
+      randomSentence = `${adjWord} ${nounWord}`
 
       const checkUnique = await prisma.shares.findUnique({
         where: {
