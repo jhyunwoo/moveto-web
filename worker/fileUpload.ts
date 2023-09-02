@@ -265,35 +265,34 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
       }
       /** 최대 50개읯 파일이 업로드 될 때 까지 기다림 */
       res = await Promise.all(mulitpartPromise)
-    }
+      // 에러 발생시 다시 업로드
+      while (errorList.length > 0) {
+        console.log("try to reupload files")
+        /** Pre-Signed URL 요청을 위한 파일 데이터 저장 배열 */
+        const reuploadInfo: SignedUrlReqInfo[] = []
+        // 파일 데이터 저장
+        for (let i = 0; i < errorList.length; i += 1) {
+          reuploadInfo.push(errorList[i].info)
+        }
+        /** 다시 업로드 할 Pre-Signed URL */
+        const reuploadUrls: string[] = await getSignedUrls(reuploadInfo)
 
-    // 에러 발생시 다시 업로드
-    while (errorList.length > 0) {
-      console.log("try to reupload files")
-      /** Pre-Signed URL 요청을 위한 파일 데이터 저장 배열 */
-      const reuploadInfo: SignedUrlReqInfo[] = []
-      // 파일 데이터 저장
-      for (let i = 0; i < errorList.length; i += 1) {
-        reuploadInfo.push(errorList[i].info)
+        // 업로드 요청
+        for (let i = 0; i < errorList.length; i += 1) {
+          console.log("small file multipart reupload : ", i)
+          mulitpartPromise[errorList[i].id] = axios
+            .put(reuploadUrls[i], smallChunks[0][errorList[i].id], {
+              onUploadProgress(progressEvent) {
+                progress[errorList[i].id] = progressEvent.loaded
+              },
+            })
+            .then((e) => {
+              errorList.splice(i, 1)
+              return e
+            })
+        }
+        res = await Promise.all(mulitpartPromise)
       }
-      /** 다시 업로드 할 Pre-Signed URL */
-      const reuploadUrls: string[] = await getSignedUrls(reuploadInfo)
-
-      // 업로드 요청
-      for (let i = 0; i < errorList.length; i += 1) {
-        console.log("small file multipart reupload : ", i)
-        mulitpartPromise[errorList[i].id] = axios
-          .put(reuploadUrls[i], smallChunks[0][errorList[i].id], {
-            onUploadProgress(progressEvent) {
-              progress[errorList[i].id] = progressEvent.loaded
-            },
-          })
-          .then((e) => {
-            errorList.splice(i, 1)
-            return e
-          })
-      }
-      res = await Promise.all(mulitpartPromise)
     }
 
     /** etag를 저장할 배열 */
