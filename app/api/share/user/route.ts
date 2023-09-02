@@ -1,9 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import {
-  AbortMultipartUploadCommand,
-  DeleteObjectsCommand,
-  S3Client,
-} from "@aws-sdk/client-s3"
+import { DeleteObjectsCommand, S3Client } from "@aws-sdk/client-s3"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
 import { authOptions } from "../../auth/[...nextauth]/route"
@@ -33,32 +29,21 @@ export async function DELETE(request: Request) {
       },
     })
 
-    if (findShare.created === findShare.updated) {
-      for (let i = 0; i < findShare.files.length; i += 1) {
-        const command = new AbortMultipartUploadCommand({
-          Bucket: "moveto-bucket",
-          Key: id + "/" + findShare.files[i],
-          UploadId: "ddd",
-        })
-        const response = await S3.send(command)
-      }
-    } else {
-      const deleteObjects: { Key: string }[] = []
-      for (let i = 0; i < findShare?.files.length; i += 1) {
-        deleteObjects.push({ Key: id + "/" + findShare.files[i] })
-      }
+    const deleteObjects: { Key: string }[] = []
+    for (let i = 0; i < findShare?.files.length; i += 1) {
+      deleteObjects.push({ Key: id + "/" + findShare.files[i] })
+    }
 
-      const command = new DeleteObjectsCommand({
-        Bucket: "moveto-bucket",
-        Delete: {
-          Objects: deleteObjects,
-        },
-      })
-      try {
-        const { Deleted } = await S3.send(command)
-      } catch (err) {
-        return NextResponse.json({ message: "Delete Objects Error" })
-      }
+    const command = new DeleteObjectsCommand({
+      Bucket: "moveto-bucket",
+      Delete: {
+        Objects: deleteObjects,
+      },
+    })
+    try {
+      const { Deleted } = await S3.send(command)
+    } catch (err) {
+      return NextResponse.json({ message: "Delete Objects Error" })
     }
   }
 
