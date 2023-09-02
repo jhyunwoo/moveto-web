@@ -59,9 +59,6 @@ dependencies:
   next-auth:
     specifier: ^4.23.1
     version: 4.23.1(next@13.4.19)(react-dom@18.2.0)(react@18.2.0)
-  pd-korean-noun-list-for-wordles:
-    specifier: ^0.4.0
-    version: 0.4.0
   postcss:
     specifier: 8.4.27
     version: 8.4.27
@@ -5569,10 +5566,6 @@ packages:
   /path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
-    dev: false
-
-  /pd-korean-noun-list-for-wordles@0.4.0:
-    resolution: {integrity: sha512-a4mP4uIvWrGuG+PB3aMLjN77mJR4t9fB2LZyJO1XFklBJR8I86DlXFE0PmtZKdlmCne+FR588DTJAcNaigucGg==}
     dev: false
 
   /picocolors@1.0.0:
