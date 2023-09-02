@@ -220,42 +220,45 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
     /** 업로드 ID */
     const uploadId: string = multipartInfo.UploadId
 
-    /** 업로드 할 파일 chunks에 대한 정보를 저장할 배열 */
-    const uploadUrlReqInfo: SignedUrlReqInfo[] = []
-    // 모든 chunks에 대한 fileKey, uploadId, index 값 배열에 저장
-    for (let i = 0; i < smallChunks[0].length; i += 1) {
-      uploadUrlReqInfo.push({
-        fileKey: fileKey,
-        uploadId: uploadId,
-        index: i + 1,
-      })
-    }
-
-    /** 모든 chunks에 대한 업로드 URL */
-    const signedUrls: string[] = await getSignedUrls(uploadUrlReqInfo)
-
     /** 비동기 처리를 위한 업로드 요청 저장 배열 */
     let mulitpartPromise = []
     /** 에러 저장 배열 */
-    let errorList: number[] = []
+    let errorList: { id: number; info: SignedUrlReqInfo }[] = []
     let res: (void | AxiosResponse<any, any>)[] = []
     // upload files
     for (let i = 0; i < Math.ceil(smallChunks[0].length / 50); i += 1) {
       // 한 번에 50개의 chunks 씩 업로드
+      const uploadUrlReqInfo: SignedUrlReqInfo[] = []
+      // 모든 chunks에 대한 fileKey, uploadId, index 값 배열에 저장
+      for (let j = 0; j < 50; j += 1) {
+        if (!smallChunks[0][50 * i + j]) break
+        uploadUrlReqInfo.push({
+          fileKey: fileKey,
+          uploadId: uploadId,
+          index: 50 * i + j + 1,
+        })
+      }
+      /** 모든 chunks에 대한 업로드 URL */
+      const signedUrls: string[] = await getSignedUrls(uploadUrlReqInfo)
+
       for (let j = 0; j < 50; j += 1) {
         const chunkAddress = 50 * i + j
         if (!smallChunks[0][chunkAddress]) break
+
         const currentCount = count
         console.log("small file multipart upload : ", chunkAddress)
         mulitpartPromise.push(
           axios
-            .put(signedUrls[chunkAddress], smallChunks[0][chunkAddress], {
+            .put(signedUrls[j], smallChunks[0][chunkAddress], {
               onUploadProgress(progressEvent) {
                 progress[currentCount] = progressEvent.loaded
               },
             })
             .catch(() => {
-              errorList.push(chunkAddress)
+              errorList.push({
+                id: chunkAddress,
+                info: uploadUrlReqInfo[j],
+              })
             })
         )
         count = count + 1
@@ -271,8 +274,7 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
       const reuploadInfo: SignedUrlReqInfo[] = []
       // 파일 데이터 저장
       for (let i = 0; i < errorList.length; i += 1) {
-        const info = uploadUrlReqInfo[errorList[i]]
-        reuploadInfo.push(info)
+        reuploadInfo.push(errorList[i].info)
       }
       /** 다시 업로드 할 Pre-Signed URL */
       const reuploadUrls: string[] = await getSignedUrls(reuploadInfo)
@@ -280,10 +282,10 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
       // 업로드 요청
       for (let i = 0; i < errorList.length; i += 1) {
         console.log("small file multipart reupload : ", i)
-        mulitpartPromise[errorList[i]] = axios
-          .put(reuploadUrls[i], smallChunks[0][errorList[i]], {
+        mulitpartPromise[errorList[i].id] = axios
+          .put(reuploadUrls[i], smallChunks[0][errorList[i].id], {
             onUploadProgress(progressEvent) {
-              progress[errorList[i]] = progressEvent.loaded
+              progress[errorList[i].id] = progressEvent.loaded
             },
           })
           .then((e) => {
