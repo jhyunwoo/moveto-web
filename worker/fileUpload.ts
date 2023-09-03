@@ -321,5 +321,243 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
     smallUploads.shift()
     smallChunks.shift()
   }
+
+  // middle mulitpart upload
+  while (middleUploads.length > 0) {
+    /** R2에 저장할 파일 위치 */
+    const fileKey = shareId + "/" + middleUploads[0].name
+    /** Multipart Upload 생성 */
+    const createMultipart = await fetch("/api/share/file/multipart/start", {
+      method: "POST",
+      body: JSON.stringify({
+        fileKey: fileKey,
+      }),
+    })
+    /** 생성한 Multipart Upload 정보 */
+    const multipartInfo = await createMultipart.json()
+
+    /** 업로드 ID */
+    const uploadId: string = multipartInfo.UploadId
+
+    /** 비동기 처리를 위한 업로드 요청 저장 배열 */
+    let mulitpartPromise = []
+    /** 에러 저장 배열 */
+    let errorList: { id: number; info: SignedUrlReqInfo }[] = []
+    let res: (void | AxiosResponse<any, any>)[] = []
+    // upload files
+    for (let i = 0; i < Math.ceil(middleChunks[0].length / 10); i += 1) {
+      // 한 번에 50개의 chunks 씩 업로드
+      const uploadUrlReqInfo: SignedUrlReqInfo[] = []
+      // 모든 chunks에 대한 fileKey, uploadId, index 값 배열에 저장
+      for (let j = 0; j < 10; j += 1) {
+        if (!middleChunks[0][10 * i + j]) break
+        uploadUrlReqInfo.push({
+          fileKey: fileKey,
+          uploadId: uploadId,
+          index: 10 * i + j + 1,
+        })
+      }
+      /** 모든 chunks에 대한 업로드 URL */
+      const signedUrls: string[] = await getSignedUrls(uploadUrlReqInfo)
+
+      for (let j = 0; j < 10; j += 1) {
+        const chunkAddress = 10 * i + j
+        if (!middleChunks[0][chunkAddress]) break
+
+        const currentCount = count
+        console.log("middle file multipart upload : ", chunkAddress)
+        mulitpartPromise.push(
+          axios
+            .put(signedUrls[j], middleChunks[0][chunkAddress], {
+              onUploadProgress(progressEvent) {
+                progress[currentCount] = progressEvent.loaded
+              },
+            })
+            .catch(() => {
+              errorList.push({
+                id: chunkAddress,
+                info: uploadUrlReqInfo[j],
+              })
+            })
+        )
+        count = count + 1
+      }
+      /** 최대 50개읯 파일이 업로드 될 때 까지 기다림 */
+      res = await Promise.all(mulitpartPromise)
+      // 에러 발생시 다시 업로드
+      while (errorList.length > 0) {
+        console.log("try to reupload files")
+        /** Pre-Signed URL 요청을 위한 파일 데이터 저장 배열 */
+        const reuploadInfo: SignedUrlReqInfo[] = []
+        // 파일 데이터 저장
+        for (let i = 0; i < errorList.length; i += 1) {
+          reuploadInfo.push(errorList[i].info)
+        }
+        /** 다시 업로드 할 Pre-Signed URL */
+        const reuploadUrls: string[] = await getSignedUrls(reuploadInfo)
+
+        // 업로드 요청
+        for (let i = 0; i < errorList.length; i += 1) {
+          console.log("middle file multipart reupload : ", i)
+          mulitpartPromise[errorList[i].id] = axios
+            .put(reuploadUrls[i], middleChunks[0][errorList[i].id], {
+              onUploadProgress(progressEvent) {
+                progress[errorList[i].id] = progressEvent.loaded
+              },
+            })
+            .then((e) => {
+              errorList.splice(i, 1)
+              return e
+            })
+        }
+        res = await Promise.all(mulitpartPromise)
+      }
+    }
+
+    /** etag를 저장할 배열 */
+    const etags: string[] = []
+    // 업로드 결과에서 etag 값 저장
+    for (let i = 0; i < res.length; i += 1) {
+      etags.push(
+        res[i]?.headers?.etag?.substring(1, res[i]?.headers?.etag?.length - 1)
+      )
+    }
+
+    // finish multipart upload
+    const complete = await fetch("/api/share/file/multipart/complete", {
+      method: "POST",
+      body: JSON.stringify({
+        fileKey: fileKey,
+        uploadId: uploadId,
+        uploadResults: etags,
+      }),
+    })
+    const completeResult = await complete.json()
+
+    if (completeResult.message === "Complete error") {
+      postMessage({ message: "error", log: completeResult.log })
+    }
+    middleUploads.shift()
+    middleChunks.shift()
+  }
+
+  // large mulitpart upload
+  while (largeUploads.length > 0) {
+    /** R2에 저장할 파일 위치 */
+    const fileKey = shareId + "/" + largeUploads[0].name
+    /** Multipart Upload 생성 */
+    const createMultipart = await fetch("/api/share/file/multipart/start", {
+      method: "POST",
+      body: JSON.stringify({
+        fileKey: fileKey,
+      }),
+    })
+    /** 생성한 Multipart Upload 정보 */
+    const multipartInfo = await createMultipart.json()
+
+    /** 업로드 ID */
+    const uploadId: string = multipartInfo.UploadId
+
+    /** 비동기 처리를 위한 업로드 요청 저장 배열 */
+    let mulitpartPromise = []
+    /** 에러 저장 배열 */
+    let errorList: { id: number; info: SignedUrlReqInfo }[] = []
+    let res: (void | AxiosResponse<any, any>)[] = []
+    // upload files
+    for (let i = 0; i < Math.ceil(largeChunks[0].length / 5); i += 1) {
+      // 한 번에 50개의 chunks 씩 업로드
+      const uploadUrlReqInfo: SignedUrlReqInfo[] = []
+      // 모든 chunks에 대한 fileKey, uploadId, index 값 배열에 저장
+      for (let j = 0; j < 5; j += 1) {
+        if (!largeChunks[0][5 * i + j]) break
+        uploadUrlReqInfo.push({
+          fileKey: fileKey,
+          uploadId: uploadId,
+          index: 5 * i + j + 1,
+        })
+      }
+      /** 모든 chunks에 대한 업로드 URL */
+      const signedUrls: string[] = await getSignedUrls(uploadUrlReqInfo)
+
+      for (let j = 0; j < 5; j += 1) {
+        const chunkAddress = 5 * i + j
+        if (!largeChunks[0][chunkAddress]) break
+
+        const currentCount = count
+        console.log("large file multipart upload : ", chunkAddress)
+        mulitpartPromise.push(
+          axios
+            .put(signedUrls[j], largeChunks[0][chunkAddress], {
+              onUploadProgress(progressEvent) {
+                progress[currentCount] = progressEvent.loaded
+              },
+            })
+            .catch(() => {
+              errorList.push({
+                id: chunkAddress,
+                info: uploadUrlReqInfo[j],
+              })
+            })
+        )
+        count = count + 1
+      }
+      /** 최대 50개읯 파일이 업로드 될 때 까지 기다림 */
+      res = await Promise.all(mulitpartPromise)
+      // 에러 발생시 다시 업로드
+      while (errorList.length > 0) {
+        console.log("try to reupload files")
+        /** Pre-Signed URL 요청을 위한 파일 데이터 저장 배열 */
+        const reuploadInfo: SignedUrlReqInfo[] = []
+        // 파일 데이터 저장
+        for (let i = 0; i < errorList.length; i += 1) {
+          reuploadInfo.push(errorList[i].info)
+        }
+        /** 다시 업로드 할 Pre-Signed URL */
+        const reuploadUrls: string[] = await getSignedUrls(reuploadInfo)
+
+        // 업로드 요청
+        for (let i = 0; i < errorList.length; i += 1) {
+          console.log("large file multipart reupload : ", i)
+          mulitpartPromise[errorList[i].id] = axios
+            .put(reuploadUrls[i], largeChunks[0][errorList[i].id], {
+              onUploadProgress(progressEvent) {
+                progress[errorList[i].id] = progressEvent.loaded
+              },
+            })
+            .then((e) => {
+              errorList.splice(i, 1)
+              return e
+            })
+        }
+        res = await Promise.all(mulitpartPromise)
+      }
+    }
+
+    /** etag를 저장할 배열 */
+    const etags: string[] = []
+    // 업로드 결과에서 etag 값 저장
+    for (let i = 0; i < res.length; i += 1) {
+      etags.push(
+        res[i]?.headers?.etag?.substring(1, res[i]?.headers?.etag?.length - 1)
+      )
+    }
+
+    // finish multipart upload
+    const complete = await fetch("/api/share/file/multipart/complete", {
+      method: "POST",
+      body: JSON.stringify({
+        fileKey: fileKey,
+        uploadId: uploadId,
+        uploadResults: etags,
+      }),
+    })
+    const completeResult = await complete.json()
+
+    if (completeResult.message === "Complete error") {
+      postMessage({ message: "error", log: completeResult.log })
+    }
+    largeUploads.shift()
+    largeChunks.shift()
+  }
   postMessage({ message: "upload complete", shareId: shareId })
 })
