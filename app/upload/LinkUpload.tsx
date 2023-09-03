@@ -356,7 +356,7 @@ export default function LinkUpload() {
           공유
         </button>
         <div className="ml-auto mt-2">
-          {session?.user.plan ? session?.user.plan : "Guest"} Plan:{" "}
+          {session?.user.plan ? session?.user.plan : "Guest"} Plan: 최대{" "}
           {getShareTime(session?.user.plan)} 동안 공유
         </div>
       </form>
