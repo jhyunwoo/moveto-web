@@ -37,7 +37,7 @@ export async function DELETE(request: Request) {
   let targetList: any[] = []
 
   for (let i = 0; i < shareList.length; i += 1) {
-    if (shareList[i].expires === null) return
+    if (shareList[i].expires == null) return
 
     if (shareList[i].expires > currentTime) {
       targetList.push(shareList[i])
@@ -72,6 +72,8 @@ export async function POST(request: Request) {
   const { files } = requestData
 
   const session = await getServerSession(authOptions)
+  const expireTime = new Date()
+  expireTime.setMinutes(expireTime.getMinutes() + 60 * 24)
 
   let createShare
   if (session?.user?.id) {
@@ -81,12 +83,14 @@ export async function POST(request: Request) {
           connect: { id: session.user.id },
         },
         files: files,
+        expires: expireTime,
       },
     })
   } else {
     createShare = await prisma.shares.create({
       data: {
         files: files,
+        expires: expireTime,
       },
     })
   }
