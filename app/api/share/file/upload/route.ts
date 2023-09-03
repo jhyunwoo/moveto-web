@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 /** get access code after upload file */
 export async function PUT(request: Request) {
   const requestData = await request.json()
-  const { shareId } = requestData
+  const { shareId, expires }: { shareId: string; expires: number } = requestData
 
   const nounLength = await prisma.nouns.count()
   const adjLength = await prisma.adjectives.count()
@@ -50,8 +50,8 @@ export async function PUT(request: Request) {
     let randomSentence = ""
 
     while (true) {
-      const nounRandom = Math.ceil(Math.random() * nounLength)
-      const adjRandom = Math.ceil(Math.random() * adjLength)
+      const nounRandom = Math.floor(Math.random() * nounLength)
+      const adjRandom = Math.floor(Math.random() * adjLength)
       const nounWord = await prisma.nouns
         .findFirst({
           skip: nounRandom,
@@ -72,6 +72,8 @@ export async function PUT(request: Request) {
     }
 
     const currentTime = new Date()
+    const expireTime = new Date()
+    expireTime.setMinutes(expireTime.getMinutes() + expires)
 
     const updateShare = await prisma.shares.update({
       where: {
@@ -80,6 +82,7 @@ export async function PUT(request: Request) {
       data: {
         accessCode: randomSentence,
         updated: currentTime,
+        expires: expireTime,
       },
     })
 

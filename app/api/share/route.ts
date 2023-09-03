@@ -73,7 +73,9 @@ export async function DELETE(request: Request) {
 
   try {
     const result = await prisma.$transaction(makeQuery())
-  } catch {}
+  } catch (e) {
+    console.error(e)
+  }
   return NextResponse.json({ fileKeys: targetList })
 }
 

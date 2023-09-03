@@ -102,7 +102,7 @@ export default function FileUpload() {
     setProgressMessage("업로드 완료")
     const requestCode = await fetch("/api/share/file/upload", {
       method: "PUT",
-      body: JSON.stringify({ shareId: shareId }),
+      body: JSON.stringify({ shareId: shareId, expires: 5 }),
     })
     const codeData = await requestCode.json()
     setAccessCode(codeData.result.accessCode)
@@ -220,18 +220,29 @@ export default function FileUpload() {
       ) : (
         ""
       )}
-      {files.length > 0 ? (
-        <>
-          <button
-            type="button"
-            onClick={handleUpload}
-            className="rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700"
-          >
-            파일 업로드
-          </button>
-        </>
-      ) : (
-        ""
+      {/* {files.length > 0 && (
+        <div>
+          <div>공유 시간</div>
+          <div className="flex justify-around">
+            <button>5분</button>
+            <button>10분</button>
+            <button>30분</button>
+            <button>1시간</button>
+            <form>
+              <div>사용자 설정</div>
+              <input />
+            </form>
+          </div>
+        </div>
+      )} */}
+      {files.length > 0 && (
+        <button
+          type="button"
+          onClick={handleUpload}
+          className="rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700"
+        >
+          파일 업로드
+        </button>
       )}
     </div>
   )
