@@ -5,10 +5,12 @@ import { useSetRecoilState } from "recoil"
 import { accessCode, alertState, loadingState } from "@/lib/recoil"
 import { useSession } from "next-auth/react"
 import getShareTime from "@/lib/getShareTime"
+import getMaxShareTime from "@/lib/getMaxShareTime"
 
 type Inputs = {
   text: string
   isLink: Boolean
+  expires: number
 }
 
 export default function LinkUpload() {
@@ -17,7 +19,8 @@ export default function LinkUpload() {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<Inputs>({ mode: "onBlur" })
+    setValue,
+  } = useForm<Inputs>({ mode: "onBlur", defaultValues: { expires: 5 } })
 
   const { data: session } = useSession()
 
@@ -29,13 +32,16 @@ export default function LinkUpload() {
     setLoading(true)
     const createShare = await fetch("/api/share/link", {
       method: "POST",
-      body: JSON.stringify({ text: data.text, isLink: data.isLink }),
+      body: JSON.stringify({
+        text: data.text,
+        isLink: data.isLink,
+        expires: data.expires,
+      }),
     })
     const shareInfo = await createShare.json()
-    console.log(shareInfo)
     const requestCode = await fetch("/api/share/file/upload", {
       method: "PUT",
-      body: JSON.stringify({ shareId: shareInfo.id }),
+      body: JSON.stringify({ shareId: shareInfo.id, expires: data.expires }),
     })
     const createCode = await requestCode.json()
     if (createCode.result === "error") {
@@ -94,6 +100,254 @@ export default function LinkUpload() {
               링크로 공유
             </span>
           </label>
+        </div>
+        <div className="w-full rounded-md border-2 border-green-500 p-2">
+          <div className="text-lg font-semibold">공유 시간</div>
+          <div className="flex flex-col">
+            <div className="flex justify-around space-x-1">
+              {!session && (
+                <>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 1
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 1)
+                    }}
+                  >
+                    1분
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 3
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 3)
+                    }}
+                  >
+                    3분
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 5
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 5)
+                    }}
+                  >
+                    5분
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 10
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 10)
+                    }}
+                  >
+                    10분
+                  </button>
+                </>
+              )}
+              {session?.user.plan === "Free" && (
+                <>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 5
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 5)
+                    }}
+                  >
+                    5분
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 10
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 10)
+                    }}
+                  >
+                    10분
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 30
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 30)
+                    }}
+                  >
+                    30분
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60)
+                    }}
+                  >
+                    1시간
+                  </button>
+                </>
+              )}
+              {session?.user.plan === "Baisc" && (
+                <>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 10
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 10)
+                    }}
+                  >
+                    10분
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60)
+                    }}
+                  >
+                    1시간
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60 * 6
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60 * 6)
+                    }}
+                  >
+                    6시간
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60 * 12
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60 * 12)
+                    }}
+                  >
+                    12시간
+                  </button>
+                </>
+              )}
+              {session?.user.plan === "Pro" && (
+                <>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60)
+                    }}
+                  >
+                    1시간
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60 * 3
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60 * 3)
+                    }}
+                  >
+                    3시간
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60 * 12
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60 * 12)
+                    }}
+                  >
+                    12시간
+                  </button>
+                  <button
+                    className={` w-full rounded-md p-1 px-2 transition duration-200  ${
+                      watch("expires") === 60 * 24
+                        ? "bg-green-500  text-white dark:bg-green-600"
+                        : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+                    } `}
+                    type="button"
+                    onClick={() => {
+                      setValue("expires", 60 * 24)
+                    }}
+                  >
+                    24시간
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="mt-2 text-sm">사용자 설정</div>
+            <div className="flex items-center space-x-1">
+              <input
+                className="rounded-md p-1 px-2 outline-none dark:bg-slate-800"
+                {...register("expires", {
+                  min: {
+                    value: 1,
+                    message: "올바른 시간을 입력해주세요.",
+                  },
+                  max: {
+                    value: getMaxShareTime(session),
+                    message: "최대 공유 시간을 초과하였습니다.",
+                  },
+                })}
+              />
+              <div>분</div>
+            </div>
+          </div>
         </div>
         <button
           type="submit"

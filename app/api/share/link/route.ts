@@ -5,11 +5,13 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   const requestData = await request.json()
-  const { text, isLink } = requestData
+  const { text, isLink, expires } = requestData
 
   const session = await getServerSession(authOptions)
 
   let createLink
+  const expiresTime = new Date()
+  expiresTime.setMinutes(expiresTime.getMinutes() + expires)
 
   if (session?.user?.id) {
     createLink = await prisma.shares.create({
@@ -19,6 +21,7 @@ export async function POST(request: Request) {
         },
         text: text,
         isLink: isLink,
+        expires: expiresTime,
       },
     })
   } else {
@@ -26,6 +29,7 @@ export async function POST(request: Request) {
       data: {
         text: text,
         isLink: isLink,
+        expires: expiresTime,
       },
     })
   }
