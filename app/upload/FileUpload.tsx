@@ -12,6 +12,7 @@ import getShareTime from "@/lib/getShareTime"
 import getTotalFileSize from "@/lib/getTotalFileSize"
 import getFileNameList from "@/lib/getFileNameList"
 import { SubmitHandler, useForm } from "react-hook-form"
+import getMaxShareTime from "@/lib/getMaxShareTime"
 
 const ONEMB = 1024 * 1024
 const ONEGB = 1024 * ONEMB
@@ -126,18 +127,6 @@ export default function FileUpload() {
     if (fileInputRef.current) fileInputRef.current.value = ""
     setProgressMessage("")
     setProgress(0)
-  }
-
-  function getMaxShareTime() {
-    const userPlan = session?.user.plan
-    if (userPlan === "Pro") {
-      return 24 * 60
-    } else if (userPlan === "Basic") {
-      return 12 * 60
-    } else if (userPlan) {
-      return 60
-    }
-    return 5
   }
 
   // worker 설정 useEffect
@@ -489,7 +478,7 @@ export default function FileUpload() {
                       message: "올바른 시간을 입력해주세요.",
                     },
                     max: {
-                      value: getMaxShareTime(),
+                      value: getMaxShareTime(session),
                       message: "최대 공유 시간을 초과하였습니다.",
                     },
                   })}
