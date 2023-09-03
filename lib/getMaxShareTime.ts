@@ -6,8 +6,8 @@ export default function getMaxShareTime(session: Session | null) {
     return 24 * 60
   } else if (userPlan === "Basic") {
     return 12 * 60
-  } else if (userPlan) {
+  } else if (userPlan === "Free") {
     return 60
   }
-  return 5
+  return 10
 }

@@ -220,7 +220,7 @@ export default function FileUpload() {
           </div>
         )}
         <div className="ml-auto mt-2 text-sm">
-          {getShareTime(session?.user.plan)} 동안 공유
+          최대 {getShareTime(session?.user.plan)} 동안 공유
         </div>
         <div
           className={`ml-auto text-sm ${
