@@ -37,21 +37,9 @@ export async function DELETE(request: Request) {
   let targetList: any[] = []
 
   for (let i = 0; i < shareList.length; i += 1) {
-    if (!shareList[i]) return
+    if (shareList[i].expires === null) return
 
-    let downloadTime = 5 * 60000
-    if (shareList[i]?.user?.plan) {
-      if (shareList[i].user?.plan === "Free") {
-        downloadTime = 20 * 60000
-      } else if (shareList[i].user?.plan === "Basic") {
-        downloadTime = 60 * 60000
-      } else if (shareList[i].user?.plan === "Pro") {
-        downloadTime = 120 * 60000
-      }
-    }
-    let createdDate = new Date(shareList[i].updated)
-    const expireTime = new Date(createdDate.getTime() + downloadTime)
-    if (expireTime < currentTime) {
+    if (shareList[i].expires > currentTime) {
       targetList.push(shareList[i])
     }
   }

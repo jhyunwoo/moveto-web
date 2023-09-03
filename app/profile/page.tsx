@@ -106,9 +106,9 @@ export default async function User() {
             {/* 공유 지속 시간 */}
             <SectionTitle>공유 시간</SectionTitle>
             <GuestPlanText>5분</GuestPlanText>
-            <FreePlanText>20분</FreePlanText>
-            <BasicPlanText>1시간</BasicPlanText>
-            <ProPlanText>2시간</ProPlanText>
+            <FreePlanText>1시간</FreePlanText>
+            <BasicPlanText>12시간</BasicPlanText>
+            <ProPlanText>24시간</ProPlanText>
 
             <Link
               href="/user/change-plan"
