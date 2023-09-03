@@ -11,13 +11,13 @@ import Progress from "./Progress"
 import getShareTime from "@/lib/getShareTime"
 import getTotalFileSize from "@/lib/getTotalFileSize"
 import getFileNameList from "@/lib/getFileNameList"
+import { SubmitHandler, useForm } from "react-hook-form"
 
 const ONEMB = 1024 * 1024
 const ONEGB = 1024 * ONEMB
 
-type ProgressUpdateType = {
-  id: number
-  uploaded: number
+type Inputs = {
+  expires: number
 }
 
 export default function FileUpload() {
@@ -34,6 +34,22 @@ export default function FileUpload() {
 
   const workerRef = useRef<Worker>()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<Inputs>({
+    defaultValues: {
+      expires: 5,
+    },
+  })
+
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log(data)
+  }
 
   /** input 태그에 파일 값 변경시 filse state에 새로운 파일만 값 저장 */
   function handleInputChage(e: ChangeEvent<HTMLInputElement>) {
@@ -220,26 +236,63 @@ export default function FileUpload() {
       ) : (
         ""
       )}
-      {/* {files.length > 0 && (
-        <div>
-          <div>공유 시간</div>
-          <div className="flex justify-around">
-            <button>5분</button>
-            <button>10분</button>
-            <button>30분</button>
-            <button>1시간</button>
-            <form>
-              <div>사용자 설정</div>
-              <input />
+      {files.length > 0 && (
+        <div className="rounded-md border-2 border-green-500 p-2">
+          <div className="font-semibold">공유 시간</div>
+          <div className="flex flex-col">
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="flex justify-around">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue("expires", 5)
+                  }}
+                >
+                  5분
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue("expires", 10)
+                  }}
+                >
+                  10분
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue("expires", 30)
+                  }}
+                >
+                  30분
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue("expires", 60)
+                  }}
+                >
+                  1시간
+                </button>
+              </div>
+              <div className="text-sm">사용자 설정</div>
+              <input
+                {...register("expires", {
+                  min: {
+                    value: 1,
+                    message: "올바른 시간을 입력해주세요.",
+                  },
+                })}
+              />
             </form>
           </div>
         </div>
-      )} */}
+      )}
       {files.length > 0 && (
         <button
           type="button"
           onClick={handleUpload}
-          className="rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700"
+          className="mt-4 rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700"
         >
           파일 업로드
         </button>
