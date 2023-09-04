@@ -39,7 +39,9 @@ export async function DELETE(request: Request) {
   for (let i = 0; i < shareList.length; i += 1) {
     if (shareList[i].expires == null) return
 
-    if (shareList[i].expires > currentTime) {
+    if (
+      shareList[i].expires.getMilliseconds() < currentTime.getMilliseconds()
+    ) {
       targetList.push(shareList[i])
     }
   }
