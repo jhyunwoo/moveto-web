@@ -4,6 +4,15 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import getKorTime from "@/lib/getKorTime"
 
+function korDate(date: Date) {
+  const sharedDate = new Date(date)
+  const options: { dateStyle: "long"; timeStyle: "medium" } = {
+    dateStyle: "long",
+    timeStyle: "medium",
+  }
+  return Intl.DateTimeFormat("ko-KR", options).format(sharedDate)
+}
+
 /** get Pre-Signed URL from R2 Bucket */
 export async function POST(request: Request) {
   const requestData = await request.json()
@@ -75,6 +84,7 @@ export async function PUT(request: Request) {
     const currentTime = getKorTime()
     const expireTime = getKorTime()
     expireTime.setMinutes(expireTime.getMinutes() + expires)
+    console.log(korDate(currentTime), korDate(expireTime))
 
     const updateShare = await prisma.shares.update({
       where: {
