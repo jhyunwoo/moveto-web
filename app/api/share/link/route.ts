@@ -1,5 +1,4 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import getKorTime from "@/lib/getKorTime"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
@@ -11,7 +10,7 @@ export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
 
   let createLink
-  const expiresTime = getKorTime()
+  const expiresTime = new Date()
   expiresTime.setMinutes(expiresTime.getMinutes() + expires)
 
   if (session?.user?.id) {

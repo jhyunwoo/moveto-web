@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import getKorTime from "@/lib/getKorTime"
 
 function korDate(date: Date) {
   const sharedDate = new Date(date)
@@ -81,8 +80,8 @@ export async function PUT(request: Request) {
       if (checkUnique === null) break
     }
 
-    const currentTime = getKorTime()
-    const expireTime = getKorTime()
+    const currentTime = new Date()
+    const expireTime = new Date()
     expireTime.setMinutes(expireTime.getMinutes() + expires)
     console.log(korDate(currentTime), korDate(expireTime))
 
