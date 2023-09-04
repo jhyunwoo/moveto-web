@@ -10,10 +10,12 @@ import useShares from "@/lib/useShares"
 
 function korDate(date: Date) {
   const sharedDate = new Date(date)
-  const options: { dateStyle: "long"; timeStyle: "medium" } = {
-    dateStyle: "long",
-    timeStyle: "medium",
-  }
+  const options: { dateStyle: "medium"; timeStyle: "short"; hour12: boolean } =
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      hour12: false,
+    }
   return Intl.DateTimeFormat("ko-KR", options).format(sharedDate)
 }
 export default function SharesData() {
@@ -56,17 +58,17 @@ export default function SharesData() {
       <div className="flex flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900">
         {sharesLoading && (
           <div className="flex flex-col space-y-2">
-            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
-            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
-            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
-            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
-            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
-            <div className="h-20 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-28 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-28 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-28 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-28 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-28 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
+            <div className="h-28 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
           </div>
         )}
         {sharesData?.map((data: any) => (
           <section
-            className="flex w-full flex-col items-start justify-center border-t-2 p-1 dark:border-slate-500"
+            className="flex w-full flex-col items-start justify-center border-b-2 p-1 dark:border-slate-500"
             key={nanoid()}
           >
             {data.files.length > 0 ? (
@@ -91,8 +93,12 @@ export default function SharesData() {
                 {data.text}
               </div>
             )}
-            <div className="break-words text-sm">{korDate(data.updated)}</div>
-            <div className="break-words text-sm">{korDate(data.expires)}</div>
+            <div className="mt-1 break-words text-sm">
+              공유 시작: {korDate(data.updated)}
+            </div>
+            <div className="break-words text-sm">
+              공유 종료: {korDate(data.expires)}
+            </div>
             {data.accessCode ? (
               <div className="ml-auto flex items-center space-x-2">
                 <Link
