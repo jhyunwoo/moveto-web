@@ -91,6 +91,15 @@ export default function FileUpload() {
 
   /** 파일 업로드 실생시 share 값 생성 후 worker에 파일 업로드 요청 */
   async function handleUpload() {
+    if (watch("expires") > getMaxShareTime(session)) {
+      setAlert({
+        message: "최대 공유 시간을 초과하였습니다.",
+        warn: true,
+        error: false,
+      })
+      setLoading(false)
+      return
+    }
     setLoading(true)
     if (totalFileSize > maxFileSize) {
       setAlert({
@@ -128,6 +137,14 @@ export default function FileUpload() {
     if (fileInputRef.current) fileInputRef.current.value = ""
     setProgressMessage("")
     setProgress(0)
+  }
+
+  function addTime(add: number, current: number) {
+    if (current + add > getMaxShareTime(session)) {
+      setValue("expires", getMaxShareTime(session))
+    } else {
+      setValue("expires", current + add)
+    }
   }
 
   // worker 설정 useEffect
@@ -258,8 +275,50 @@ export default function FileUpload() {
               max: getMaxShareTime(session),
             })}
           />
-          <div className="ml-auto">
-            {convertMinutesToFormat(watch("expires"))}
+          <div className="mt-1 flex justify-between">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  addTime(5, watch("expires"))
+                }}
+                className="rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+              >
+                +5분
+              </button>
+              <button
+                onClick={() => {
+                  addTime(10, watch("expires"))
+                }}
+                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
+                  !session && "invisible"
+                }`}
+              >
+                +10분
+              </button>
+              <button
+                onClick={() => {
+                  addTime(30, watch("expires"))
+                }}
+                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
+                  !session && "invisible"
+                }`}
+              >
+                +30분
+              </button>
+              <button
+                onClick={() => {
+                  addTime(60, watch("expires"))
+                }}
+                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
+                  !session && "invisible"
+                }`}
+              >
+                +1시간
+              </button>
+            </div>
+            <div className="ml-auto">
+              {convertMinutesToFormat(watch("expires"))}
+            </div>
           </div>
         </form>
       </div>

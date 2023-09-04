@@ -51,6 +51,13 @@ export default function LinkUpload() {
     setAccessCode(createCode.result.accessCode)
     setLoading(false)
   }
+  function addTime(add: number, current: number) {
+    if (current + add > getMaxShareTime(session)) {
+      setValue("expires", getMaxShareTime(session))
+    } else {
+      setValue("expires", current + add)
+    }
+  }
 
   return (
     <div className="flex w-full flex-col items-start justify-center py-2 dark:text-white">
@@ -98,8 +105,50 @@ export default function LinkUpload() {
             })}
           />
 
-          <div className="ml-auto">
-            {convertMinutesToFormat(watch("expires"))}
+          <div className="mt-1 flex justify-between">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  addTime(5, watch("expires"))
+                }}
+                className="rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
+              >
+                +5분
+              </button>
+              <button
+                onClick={() => {
+                  addTime(10, watch("expires"))
+                }}
+                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
+                  !session && "invisible"
+                }`}
+              >
+                +10분
+              </button>
+              <button
+                onClick={() => {
+                  addTime(30, watch("expires"))
+                }}
+                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
+                  !session && "invisible"
+                }`}
+              >
+                +30분
+              </button>
+              <button
+                onClick={() => {
+                  addTime(60, watch("expires"))
+                }}
+                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
+                  !session && "invisible"
+                }`}
+              >
+                +1시간
+              </button>
+            </div>
+            <div className="ml-auto">
+              {convertMinutesToFormat(watch("expires"))}
+            </div>
           </div>
         </div>
         <div className="flex w-full justify-between">
