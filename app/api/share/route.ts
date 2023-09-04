@@ -17,9 +17,19 @@ export async function GET(request: Request) {
   return NextResponse.json({ share: findCode })
 }
 
+function korDate(date: Date) {
+  const sharedDate = new Date(date)
+  const options: { dateStyle: "long"; timeStyle: "medium" } = {
+    dateStyle: "long",
+    timeStyle: "medium",
+  }
+  return Intl.DateTimeFormat("ko-KR", options).format(sharedDate)
+}
+
 export async function DELETE(request: Request) {
   const requestData = await request.json()
   const { id, password } = requestData
+
   if (id !== process.env.DELETE_ID || password !== process.env.DELETE_PASSWORD)
     return NextResponse.json({ fileKeys: "auth error" })
   const currentTime = new Date()
@@ -29,19 +39,13 @@ export async function DELETE(request: Request) {
         not: null,
       },
     },
-    include: {
-      user: true,
-    },
   })
 
   let targetList: any[] = []
 
   for (let i = 0; i < shareList.length; i += 1) {
     if (shareList[i].expires == null) return
-
-    if (
-      shareList[i].expires.getMilliseconds() < currentTime.getMilliseconds()
-    ) {
+    if (shareList[i].expires < currentTime) {
       targetList.push(shareList[i])
     }
   }

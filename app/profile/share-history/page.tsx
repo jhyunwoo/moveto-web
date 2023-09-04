@@ -8,6 +8,14 @@ import DeleteShare from "./DeleteShare"
 import { useSession } from "next-auth/react"
 import useShares from "@/lib/useShares"
 
+function korDate(date: Date) {
+  const sharedDate = new Date(date)
+  const options: { dateStyle: "long"; timeStyle: "medium" } = {
+    dateStyle: "long",
+    timeStyle: "medium",
+  }
+  return Intl.DateTimeFormat("ko-KR", options).format(sharedDate)
+}
 export default function SharesData() {
   const { data: session, status } = useSession()
   const {
@@ -18,15 +26,6 @@ export default function SharesData() {
     sharesLength,
     sharesLoading,
   } = useShares()
-
-  function korDate(date: Date) {
-    const sharedDate = new Date(date)
-    const options: { dateStyle: "long"; timeStyle: "medium" } = {
-      dateStyle: "long",
-      timeStyle: "medium",
-    }
-    return Intl.DateTimeFormat("ko-KR", options).format(sharedDate)
-  }
 
   return (
     <div className="flex min-h-screen w-full flex-col space-y-2  p-4 pb-24 dark:text-white">
