@@ -1,8 +1,6 @@
-import MenuBar from "@/components/MenuBar"
 import { Metadata } from "next"
 import SearchFile from "@/components/SearchFile"
 import replaceAll from "@/lib/replaceAll"
-import Footer from "@/components/Footer"
 
 type Props = {
   searchParams: { [key: string]: string | undefined }
@@ -11,27 +9,27 @@ type Props = {
 export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {
-  let { code } = searchParams
+  let { c } = searchParams
 
-  if (code) {
-    code = code.replace("_", " ")
+  if (c) {
+    c = c.replace("_", " ")
   }
-  if (code === undefined) {
-    code = ""
+  if (c === undefined) {
+    c = ""
   }
 
   function ogImage() {
-    if (code) {
-      return [`/api/og/image?code=${escape(replaceAll(code, "\\", "%"))}`]
+    if (c) {
+      return [`/api/og/image?code=${escape(replaceAll(c, "\\", "%"))}`]
     }
     return ["/images/moveto-og.png"]
   }
 
   return {
-    title: "모베토" + (code ? " | " + code : ""),
+    title: "모베토" + (c ? " | " + c : ""),
     description: "로그인 없이 쉽고 빠른 파일 공유",
     openGraph: {
-      title: "모베토" + (code ? " | " + code : ""),
+      title: "모베토" + (c ? " | " + c : ""),
       description: "로그인 없이 쉽고 빠른 파일 공유",
       images: ogImage(),
     },

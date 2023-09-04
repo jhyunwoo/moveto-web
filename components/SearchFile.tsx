@@ -73,7 +73,7 @@ export default function SearchFile() {
     } else {
       setLoading(true)
       const code = data.accessCode.replace(" ", "_")
-      router.push(`/?code=${code}`)
+      router.push(`/?c=${code}`)
       setLoading(false)
     }
   }
