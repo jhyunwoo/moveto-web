@@ -93,6 +93,7 @@ export default function SharesData() {
               </div>
             )}
             <div className="break-words text-sm">{korDate(data.updated)}</div>
+            <div className="break-words text-sm">{korDate(data.expires)}</div>
             {data.accessCode ? (
               <div className="ml-auto flex items-center space-x-2">
                 <Link
