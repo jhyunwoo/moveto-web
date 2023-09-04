@@ -13,6 +13,7 @@ import getTotalFileSize from "@/lib/getTotalFileSize"
 import getFileNameList from "@/lib/getFileNameList"
 import { SubmitHandler, useForm } from "react-hook-form"
 import getMaxShareTime from "@/lib/getMaxShareTime"
+import convertMinutesToFormat from "@/lib/convertMinutesToFormat"
 
 const ONEMB = 1024 * 1024
 const ONEGB = 1024 * ONEMB
@@ -169,7 +170,7 @@ export default function FileUpload() {
 
   return (
     <div className="mt-2 flex w-full flex-col dark:text-white">
-      <div className="flex w-full flex-col items-start justify-start">
+      <div className="mb-2 flex w-full flex-col items-start justify-start">
         <form
           encType="multipart/form-data"
           className="flex w-full justify-start"
@@ -237,258 +238,32 @@ export default function FileUpload() {
       ) : (
         ""
       )}
-      {files.length > 0 && (
-        <div className="rounded-md border-2 border-green-500 p-2">
-          <div className="text-lg font-semibold">공유 시간</div>
-          <div className="flex flex-col">
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="flex justify-around space-x-1">
-                {!session && (
-                  <>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 1
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 1)
-                      }}
-                    >
-                      1분
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 3
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 3)
-                      }}
-                    >
-                      3분
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 5
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 5)
-                      }}
-                    >
-                      5분
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 10
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 10)
-                      }}
-                    >
-                      10분
-                    </button>
-                  </>
-                )}
-                {session?.user.plan === "Free" && (
-                  <>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 5
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 5)
-                      }}
-                    >
-                      5분
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 10
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 10)
-                      }}
-                    >
-                      10분
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 30
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 30)
-                      }}
-                    >
-                      30분
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60)
-                      }}
-                    >
-                      1시간
-                    </button>
-                  </>
-                )}
-                {session?.user.plan === "Baisc" && (
-                  <>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 10
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 10)
-                      }}
-                    >
-                      10분
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60)
-                      }}
-                    >
-                      1시간
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60 * 6
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60 * 6)
-                      }}
-                    >
-                      6시간
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60 * 12
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60 * 12)
-                      }}
-                    >
-                      12시간
-                    </button>
-                  </>
-                )}
-                {session?.user.plan === "Pro" && (
-                  <>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60)
-                      }}
-                    >
-                      1시간
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60 * 3
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60 * 3)
-                      }}
-                    >
-                      3시간
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60 * 12
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60 * 12)
-                      }}
-                    >
-                      12시간
-                    </button>
-                    <button
-                      className={` w-full rounded-md p-1 px-2 transition duration-200  ${
-                        watch("expires") === 60 * 24
-                          ? "bg-green-500  text-white dark:bg-green-600"
-                          : "bg-slate-100 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-                      } `}
-                      type="button"
-                      onClick={() => {
-                        setValue("expires", 60 * 24)
-                      }}
-                    >
-                      24시간
-                    </button>
-                  </>
-                )}
-              </div>
-              <div className="mt-2 text-sm">사용자 설정</div>
-              <div className="flex items-center space-x-1">
-                <input
-                  className="rounded-md p-1 px-2 outline-none dark:bg-slate-800"
-                  {...register("expires", {
-                    min: {
-                      value: 1,
-                      message: "올바른 시간을 입력해주세요.",
-                    },
-                    max: {
-                      value: getMaxShareTime(session),
-                      message: "최대 공유 시간을 초과하였습니다.",
-                    },
-                  })}
-                />
-                <div>분</div>
-              </div>
-            </form>
+
+      <div className="rounded-md border-2 border-green-500 p-2">
+        <div className="text-lg font-semibold">공유 시간</div>
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex w-full flex-col"
+        >
+          <input
+            className="w-full bg-slate-100 accent-green-500 dark:bg-slate-800"
+            min={1}
+            max={getMaxShareTime(session)}
+            defaultValue={5}
+            step={1}
+            type="range"
+            {...register("expires", {
+              min: 1,
+              max: getMaxShareTime(session),
+            })}
+          />
+          <div className="ml-auto">
+            {convertMinutesToFormat(watch("expires"))}
           </div>
-        </div>
-      )}
+        </form>
+      </div>
+
       {files.length > 0 && (
         <button
           type="button"

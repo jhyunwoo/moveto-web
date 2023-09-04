@@ -96,3 +96,11 @@ export async function POST(request: Request) {
   }
   return NextResponse.json(createShare)
 }
+
+/** request abort upload files */
+export async function PUT(request: Request) {
+  // cancle current file upload
+  // delet already uploaded files (single files and multipart files)
+  // abort multipart upload
+  return NextResponse.json({ message: "Abort Uploading files" })
+}

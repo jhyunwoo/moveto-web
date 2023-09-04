@@ -162,7 +162,7 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
     // 첫 10개의 파일 업로드 요청 uploadPromise 에 저장
     for (let i = 0; i < signedUrls.length; i += 1) {
       const currentCount = count
-      console.log("single file upload : ", i)
+      console.log("single file upload : ", currentCount)
       uploadPromise.push(
         axios
           .put(signedUrls[i], singleUploads[i], {
@@ -246,7 +246,7 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
         if (!smallChunks[0][chunkAddress]) break
 
         const currentCount = count
-        console.log("small file multipart upload : ", chunkAddress)
+        console.log("small file multipart upload : ", currentCount)
         mulitpartPromise.push(
           axios
             .put(signedUrls[j], smallChunks[0][chunkAddress], {
@@ -365,7 +365,7 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
         if (!middleChunks[0][chunkAddress]) break
 
         const currentCount = count
-        console.log("middle file multipart upload : ", chunkAddress)
+        console.log("middle file multipart upload : ", currentCount)
         mulitpartPromise.push(
           axios
             .put(signedUrls[j], middleChunks[0][chunkAddress], {
@@ -484,7 +484,7 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
         if (!largeChunks[0][chunkAddress]) break
 
         const currentCount = count
-        console.log("large file multipart upload : ", chunkAddress)
+        console.log("large file multipart upload : ", currentCount)
         mulitpartPromise.push(
           axios
             .put(signedUrls[j], largeChunks[0][chunkAddress], {
