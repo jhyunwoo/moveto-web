@@ -50,7 +50,35 @@ export default function FileUpload() {
   })
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(data)
+    if (watch("expires") > getMaxShareTime(session)) {
+      setAlert({
+        message: "최대 공유 시간을 초과하였습니다.",
+        warn: true,
+        error: false,
+      })
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    if (totalFileSize > maxFileSize) {
+      setAlert({
+        message: "업로드 가능한 크기를 초과하였습니다.",
+        warn: true,
+        error: false,
+      })
+      setLoading(false)
+      return
+    }
+
+    /** share 생성 */
+    const createShare = await fetch("/api/share", {
+      method: "POST",
+      body: JSON.stringify({ files: getFileNameList(files) }),
+    })
+    const result = await createShare.json()
+
+    // worker에 업로드 요청
+    handleWorker({ shareId: result.id })
   }
 
   /** input 태그에 파일 값 변경시 filse state에 새로운 파일만 값 저장 */
@@ -89,39 +117,6 @@ export default function FileUpload() {
     workerRef.current?.postMessage({ files: files, shareId: shareId })
   }
 
-  /** 파일 업로드 실생시 share 값 생성 후 worker에 파일 업로드 요청 */
-  async function handleUpload() {
-    if (watch("expires") > getMaxShareTime(session)) {
-      setAlert({
-        message: "최대 공유 시간을 초과하였습니다.",
-        warn: true,
-        error: false,
-      })
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    if (totalFileSize > maxFileSize) {
-      setAlert({
-        message: "업로드 가능한 크기를 초과하였습니다.",
-        warn: true,
-        error: false,
-      })
-      setLoading(false)
-      return
-    }
-
-    /** share 생성 */
-    const createShare = await fetch("/api/share", {
-      method: "POST",
-      body: JSON.stringify({ files: getFileNameList(files) }),
-    })
-    const result = await createShare.json()
-
-    // worker에 업로드 요청
-    handleWorker({ shareId: result.id })
-  }
-
   /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
   async function finishUpload(shareId: string) {
     setLoading(false)
@@ -140,7 +135,6 @@ export default function FileUpload() {
   }
 
   function addTime(add: number, current: number) {
-    console.log(add, current)
     if (current + add > getMaxShareTime(session)) {
       setValue("expires", getMaxShareTime(session))
     } else {
@@ -186,52 +180,18 @@ export default function FileUpload() {
   // 입력 받은 파일 크기 합 구하는 useEffect
   useEffect(() => setTotalFileSize(getTotalFileSize(files)), [files])
 
-  console.log(watch("expires"))
   return (
-    <div className="mt-2 flex w-full flex-col dark:text-white">
-      <div className="mb-2 flex w-full flex-col items-start justify-start">
-        <form
-          encType="multipart/form-data"
-          className="flex w-full justify-start"
-        >
-          <input
-            type="file"
-            multiple
-            onChange={handleInputChage}
-            style={{ display: "none" }}
-            ref={fileInputRef}
-          />
-          <button
-            type="button"
-            onClick={clickInput}
-            className="mt-1 w-full rounded-lg bg-white p-1 px-4 font-semibold ring-2 ring-green-600 transition duration-150 hover:bg-green-600 hover:text-white dark:bg-slate-800 dark:text-white sm:p-2"
-          >
-            파일 추가
-          </button>
-        </form>
-      </div>
-
-      <div className="mt-2 flex flex-col space-y-2 p-2">
-        {files.map((data, key) => (
-          <section
-            key={nanoid()}
-            className="flex items-center justify-between border-t-2 dark:border-slate-500"
-          >
-            <div className="flex flex-col justify-center text-sm font-semibold">
-              <div className="break-all">{data.name}</div>
-              <div>({formatBytes(data.size)})</div>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleFileDelete(key)}
-              className="rounded-md bg-red-500 p-1 font-semibold text-white transition duration-150 hover:bg-red-600"
-            >
-              <TrashIcon className="h-6 w-6 text-white" />
-            </button>
-          </section>
-        ))}
-      </div>
-      <div className="my-2 flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className=" mt-2 flex w-full flex-col space-y-2 dark:text-white"
+      encType="multipart/form-data"
+    >
+      {progress > 0 ? (
+        <Progress progress={progress} message={progressMessage} />
+      ) : (
+        ""
+      )}
+      <div className=" flex w-full flex-col items-start justify-center rounded-lg border-2 border-green-600 p-2">
         {status === "loading" ? (
           <div className="h-7 w-full animate-pulse rounded-md bg-slate-200 text-lg font-semibold dark:bg-slate-700" />
         ) : (
@@ -252,19 +212,9 @@ export default function FileUpload() {
           총 {formatBytes(totalFileSize)} / 최대 {formatBytes(maxFileSize)}
         </div>
       </div>
-      {progress > 0 ? (
-        <Progress progress={progress} message={progressMessage} />
-      ) : (
-        ""
-      )}
 
-      <div className="rounded-md border-2 border-green-500 p-2">
-        <div className="text-lg font-semibold">공유 시간</div>
-
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex w-full flex-col"
-        >
+      <div className="rounded-lg border-2 border-green-500 p-2">
+        <div className="flex w-full flex-col">
           <input
             className="w-full bg-slate-100 accent-green-500 dark:bg-slate-800"
             min={1}
@@ -323,21 +273,58 @@ export default function FileUpload() {
               </button>
             </div>
             <div className="ml-auto mt-1 text-sm">
-              {convertMinutesToFormat(watch("expires"))}
+              {convertMinutesToFormat(watch("expires"))} 동안 공유
             </div>
           </div>
-        </form>
+        </div>
+      </div>
+      <div className="mb-2 flex w-full flex-col items-start justify-start">
+        <div className="flex w-full justify-start">
+          <input
+            type="file"
+            multiple
+            onChange={handleInputChage}
+            style={{ display: "none" }}
+            ref={fileInputRef}
+          />
+          <button
+            type="button"
+            onClick={clickInput}
+            className="mt-1 w-full rounded-lg bg-white p-1 px-4 font-semibold ring-2 ring-green-600 transition duration-150 hover:bg-green-600 hover:text-white dark:bg-slate-800 dark:text-white sm:p-2"
+          >
+            파일 추가
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-col ">
+        {files.map((data, key) => (
+          <section
+            key={nanoid()}
+            className=" flex items-center justify-between border-b-2 p-2  last:border-b-0 dark:border-slate-500"
+          >
+            <div className="flex flex-col justify-center text-sm font-semibold">
+              <div className="break-all">{data.name}</div>
+              <div>({formatBytes(data.size)})</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleFileDelete(key)}
+              className="rounded-md bg-red-500 p-1 font-semibold text-white transition duration-150 hover:bg-red-600"
+            >
+              <TrashIcon className="h-6 w-6 text-white" />
+            </button>
+          </section>
+        ))}
       </div>
 
       {files.length > 0 && (
         <button
-          type="button"
-          onClick={handleUpload}
-          className="mt-4 rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700"
+          type="submit"
+          className="rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700"
         >
           파일 업로드
         </button>
       )}
-    </div>
+    </form>
   )
 }

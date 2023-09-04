@@ -6,6 +6,8 @@ import Recoil from "@/components/Recoil"
 import Alert from "@/components/Alert"
 import AlertWithLink from "@/components/AlertWithLink"
 import Loading from "@/components/Loading"
+import MenuBar from "@/components/MenuBar"
+import Footer from "@/components/Footer"
 
 export const metadata: Metadata = {
   title: "모베토",
@@ -255,7 +257,9 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <Recoil>
+            <MenuBar />
             {children}
+            <Footer />
             <Analytics />
             <Alert />
             <AlertWithLink />
