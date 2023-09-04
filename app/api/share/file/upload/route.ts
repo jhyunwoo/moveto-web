@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import getKorTime from "@/lib/getKorTime"
 
 /** get Pre-Signed URL from R2 Bucket */
 export async function POST(request: Request) {
@@ -71,8 +72,8 @@ export async function PUT(request: Request) {
       if (checkUnique === null) break
     }
 
-    const currentTime = new Date()
-    const expireTime = new Date()
+    const currentTime = getKorTime()
+    const expireTime = getKorTime()
     expireTime.setMinutes(expireTime.getMinutes() + expires)
 
     const updateShare = await prisma.shares.update({
