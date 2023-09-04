@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
 import { authOptions } from "../auth/[...nextauth]/route"
+import getKorTime from "@/lib/getKorTime"
 
 /** get file info from Database */
 export async function GET(request: Request) {
@@ -22,7 +23,7 @@ export async function DELETE(request: Request) {
   const { id, password } = requestData
   if (id !== process.env.DELETE_ID || password !== process.env.DELETE_PASSWORD)
     return NextResponse.json({ fileKeys: "auth error" })
-  const currentTime = new Date()
+  const currentTime = getKorTime()
   const shareList = await prisma.shares.findMany({
     where: {
       accessCode: {
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
   const { files } = requestData
 
   const session = await getServerSession(authOptions)
-  const expireTime = new Date()
+  const expireTime = getKorTime()
   expireTime.setMinutes(expireTime.getMinutes() + 60 * 24)
 
   let createShare
