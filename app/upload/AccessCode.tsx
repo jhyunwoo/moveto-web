@@ -12,7 +12,7 @@ export default function AccessCode({ code }: { code: string }) {
   const handleCopyClipBoard = async () => {
     try {
       await navigator.clipboard.writeText(
-        `https://www.moveto.kr/?code=${shareCode}`
+        `https://www.moveto.kr/?c=${shareCode}`
       )
       setCopy("클립보드에 링크가 복사되었습니다.")
     } catch (e) {

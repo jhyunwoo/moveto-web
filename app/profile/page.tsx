@@ -52,7 +52,7 @@ export default async function User() {
   if (!session) redirect("/auth/signin")
 
   return (
-    <div className="min-h-screen w-full p-4 pb-24 pt-20 dark:text-white">
+    <div className="min-h-screen w-full p-4 pb-24 dark:text-white sm:pt-20">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900 sm:col-span-2">
           <div className="mb-1 w-full border-b-2 text-lg text-slate-600 dark:border-slate-500 dark:text-slate-300">

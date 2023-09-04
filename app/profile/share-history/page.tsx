@@ -30,7 +30,7 @@ export default function SharesData() {
   } = useShares()
 
   return (
-    <div className="flex min-h-screen w-full flex-col space-y-2  p-4 pb-24 dark:text-white">
+    <div className="flex min-h-screen w-full flex-col space-y-2 p-4 pb-24 dark:text-white">
       <Link
         href={"/profile"}
         className="flex items-center space-x-1 text-green-600 transition duration-200 hover:text-green-700"
@@ -102,7 +102,7 @@ export default function SharesData() {
             {data.accessCode ? (
               <div className="ml-auto flex items-center space-x-2">
                 <Link
-                  href={`/?code=${data.accessCode.replace(" ", "_")}`}
+                  href={`/?c=${data.accessCode.replace(" ", "_")}`}
                   className=" break-words rounded-md bg-green-700 p-1 px-2 font-semibold text-white transition duration-200 hover:bg-green-600 hover:shadow-md"
                 >
                   {data.accessCode}

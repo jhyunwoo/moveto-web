@@ -40,7 +40,7 @@ export default function LinkUpload() {
       }),
     })
     const shareInfo = await createShare.json()
-    const requestCode = await fetch("/api/share/file/upload", {
+    const requestCode = await fetch("/api/word", {
       method: "PUT",
       body: JSON.stringify({ shareId: shareInfo.id, expires: data.expires }),
     })

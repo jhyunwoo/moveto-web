@@ -32,7 +32,7 @@ export default function SearchFile() {
   const setLoading = useSetRecoilState(loadingState)
 
   const params = useSearchParams()
-  const paramsCode = params.get("code")?.replace("_", " ")
+  const paramsCode = params.get("c")?.replace("_", " ")
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     if (paramsCode === data.accessCode) {
@@ -128,6 +128,7 @@ export default function SearchFile() {
         <input
           className=" w-full rounded-md  p-1 text-center text-xl font-bold outline-none ring-2 ring-green-700 dark:bg-slate-800 dark:ring-green-400 dark:ring-offset-slate-800"
           type="text"
+          autoFocus={false}
           {...register("accessCode", {
             required: { value: true, message: "접근 코드를 입력해주세요." },
           })}
