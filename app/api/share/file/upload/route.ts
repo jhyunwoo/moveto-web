@@ -51,6 +51,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   const requestData = await request.json()
   const { shareId, expires }: { shareId: string; expires: number } = requestData
+  console.log(expires)
 
   const nounLength = await prisma.nouns.count()
   const adjLength = await prisma.adjectives.count()
@@ -82,8 +83,7 @@ export async function PUT(request: Request) {
 
     const currentTime = new Date()
     const expireTime = new Date()
-    expireTime.setMinutes(expireTime.getMinutes() + expires)
-    console.log(korDate(currentTime), korDate(expireTime))
+    expireTime.setMinutes(expireTime.getMinutes() + Number(expires))
 
     const updateShare = await prisma.shares.update({
       where: {
