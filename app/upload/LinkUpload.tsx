@@ -105,19 +105,21 @@ export default function LinkUpload() {
             })}
           />
 
-          <div className="mt-1 flex justify-between">
-            <div className="flex space-x-2">
+          <div className="mt-1 flex flex-col items-start justify-center">
+            <div className="flex w-full space-x-2 text-xs">
               <button
+                type="button"
                 onClick={() => {
-                  addTime(5, watch("expires"))
+                  addTime(5, Number(watch("expires")))
                 }}
                 className="rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
               >
                 +5분
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  addTime(10, watch("expires"))
+                  addTime(10, Number(watch("expires")))
                 }}
                 className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
                   !session && "invisible"
@@ -126,8 +128,9 @@ export default function LinkUpload() {
                 +10분
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  addTime(30, watch("expires"))
+                  addTime(30, Number(watch("expires")))
                 }}
                 className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
                   !session && "invisible"
@@ -136,8 +139,9 @@ export default function LinkUpload() {
                 +30분
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  addTime(60, watch("expires"))
+                  addTime(60, Number(watch("expires")))
                 }}
                 className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
                   !session && "invisible"
@@ -146,7 +150,7 @@ export default function LinkUpload() {
                 +1시간
               </button>
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto mt-1 text-sm">
               {convertMinutesToFormat(watch("expires"))}
             </div>
           </div>

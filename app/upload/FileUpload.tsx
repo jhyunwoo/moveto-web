@@ -140,6 +140,7 @@ export default function FileUpload() {
   }
 
   function addTime(add: number, current: number) {
+    console.log(add, current)
     if (current + add > getMaxShareTime(session)) {
       setValue("expires", getMaxShareTime(session))
     } else {
@@ -185,6 +186,7 @@ export default function FileUpload() {
   // 입력 받은 파일 크기 합 구하는 useEffect
   useEffect(() => setTotalFileSize(getTotalFileSize(files)), [files])
 
+  console.log(watch("expires"))
   return (
     <div className="mt-2 flex w-full flex-col dark:text-white">
       <div className="mb-2 flex w-full flex-col items-start justify-start">
@@ -275,19 +277,21 @@ export default function FileUpload() {
               max: getMaxShareTime(session),
             })}
           />
-          <div className="mt-1 flex justify-between">
-            <div className="flex space-x-2">
+          <div className="mt-1 flex flex-col items-start justify-center">
+            <div className="flex w-full space-x-2 text-xs">
               <button
+                type="button"
                 onClick={() => {
-                  addTime(5, watch("expires"))
+                  addTime(5, Number(watch("expires")))
                 }}
                 className="rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
               >
                 +5분
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  addTime(10, watch("expires"))
+                  addTime(10, Number(watch("expires")))
                 }}
                 className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
                   !session && "invisible"
@@ -296,8 +300,9 @@ export default function FileUpload() {
                 +10분
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  addTime(30, watch("expires"))
+                  addTime(30, Number(watch("expires")))
                 }}
                 className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
                   !session && "invisible"
@@ -306,8 +311,9 @@ export default function FileUpload() {
                 +30분
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  addTime(60, watch("expires"))
+                  addTime(60, Number(watch("expires")))
                 }}
                 className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
                   !session && "invisible"
@@ -316,7 +322,7 @@ export default function FileUpload() {
                 +1시간
               </button>
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto mt-1 text-sm">
               {convertMinutesToFormat(watch("expires"))}
             </div>
           </div>
