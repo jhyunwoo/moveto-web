@@ -42,6 +42,7 @@ export default function Upload() {
             텍스트 공유
           </button>
         </div>
+
         {share === "File" ? <FileUpload /> : <LinkUpload />}
       </div>
     </CenterLayout>

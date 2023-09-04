@@ -124,27 +124,26 @@ export default function SharesData() {
             )}
           </section>
         ))}
-        <div className="mt-4 flex w-full items-center justify-end space-x-2">
+        <div className="mt-4 flex w-full items-center justify-end space-x-2 text-sm">
           {page > 1 && (
             <button
               onClick={() => setPage((prev) => prev - 1)}
-              className="rounded-md bg-green-500 p-1 px-2 text-white dark:bg-green-600"
+              className="rounded-md   bg-green-100  p-1 px-3 transition  duration-200  hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800"
             >
-              이전
+              {page - 1}
             </button>
           )}
-          <div className="text-lg font-semibold">{page}</div>
-          {(Math.ceil(sharesLength / 50) !== page || sharesLength !== 0) &&
-          Math.ceil(sharesLength / 50) !== 1 ? (
-            <button
-              onClick={() => setPage((prev) => prev + 1)}
-              className="rounded-md bg-green-500 p-1 px-2 text-white dark:bg-green-600"
-            >
-              다음
-            </button>
-          ) : (
-            ""
-          )}
+          <div className="rounded-md bg-green-500 p-1 px-4  font-semibold text-white transition duration-200 hover:bg-green-400 dark:bg-green-600 dark:hover:bg-green-500">
+            {page}
+          </div>
+          <button
+            onClick={() => setPage((prev) => prev + 1)}
+            className={`rounded-md bg-green-100  p-1 px-3 transition  duration-200  hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 ${
+              !(Math.ceil(sharesLength / 50) > page) && "invisible"
+            }`}
+          >
+            {page + 1}
+          </button>
         </div>
       </div>
     </div>

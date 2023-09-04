@@ -89,9 +89,7 @@ export default function LinkUpload() {
           />
         )}
 
-        <div className="flex w-full flex-col rounded-md border-2 border-green-500 p-2">
-          <div className="text-lg font-semibold">공유 시간</div>
-
+        <div className="flex w-full flex-col rounded-lg border-2 border-green-500 p-2">
           <input
             className="w-full bg-slate-100 accent-green-500 dark:bg-slate-800"
             min={1}
@@ -151,7 +149,7 @@ export default function LinkUpload() {
               </button>
             </div>
             <div className="ml-auto mt-1 text-sm">
-              {convertMinutesToFormat(watch("expires"))}
+              {convertMinutesToFormat(watch("expires"))} 동안 공유
             </div>
           </div>
         </div>

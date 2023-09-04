@@ -51,7 +51,6 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   const requestData = await request.json()
   const { shareId, expires }: { shareId: string; expires: number } = requestData
-  console.log(expires)
 
   const nounLength = await prisma.nouns.count()
   const adjLength = await prisma.adjectives.count()
