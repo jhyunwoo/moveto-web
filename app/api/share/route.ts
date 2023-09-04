@@ -17,15 +17,6 @@ export async function GET(request: Request) {
   return NextResponse.json({ share: findCode })
 }
 
-function korDate(date: Date) {
-  const sharedDate = new Date(date)
-  const options: { dateStyle: "long"; timeStyle: "medium" } = {
-    dateStyle: "long",
-    timeStyle: "medium",
-  }
-  return Intl.DateTimeFormat("ko-KR", options).format(sharedDate)
-}
-
 export async function DELETE(request: Request) {
   const requestData = await request.json()
   const { id, password } = requestData
@@ -67,12 +58,13 @@ export async function DELETE(request: Request) {
 
   try {
     const result = await prisma.$transaction(makeQuery())
+    return NextResponse.json({ fileKeys: targetList })
   } catch (e) {
-    console.error(e)
+    return NextResponse.json({ message: e }, { status: 500 })
   }
-  return NextResponse.json({ fileKeys: targetList })
 }
 
+/** create share data on DB */
 export async function POST(request: Request) {
   const requestData = await request.json()
   const { files } = requestData

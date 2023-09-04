@@ -122,7 +122,7 @@ export default function FileUpload() {
     setLoading(false)
     setProgress(100)
     setProgressMessage("업로드 완료")
-    const requestCode = await fetch("/api/share/file/upload", {
+    const requestCode = await fetch("/api/word", {
       method: "PUT",
       body: JSON.stringify({ shareId: shareId, expires: watch("expires") }),
     })
