@@ -73,7 +73,10 @@ export default function FileUpload() {
     /** share 생성 */
     const createShare = await fetch("/api/share", {
       method: "POST",
-      body: JSON.stringify({ files: getFileNameList(files) }),
+      body: JSON.stringify({
+        files: getFileNameList(files),
+        totalSize: getTotalFileSize(files),
+      }),
     })
     const result = await createShare.json()
 

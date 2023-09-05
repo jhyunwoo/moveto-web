@@ -2,15 +2,6 @@ import { NextResponse } from "next/server"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
-function korDate(date: Date) {
-  const sharedDate = new Date(date)
-  const options: { dateStyle: "long"; timeStyle: "medium" } = {
-    dateStyle: "long",
-    timeStyle: "medium",
-  }
-  return Intl.DateTimeFormat("ko-KR", options).format(sharedDate)
-}
-
 /** get Pre-Signed URL from R2 Bucket */
 export async function POST(request: Request) {
   const requestData = await request.json()

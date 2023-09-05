@@ -67,7 +67,7 @@ export async function DELETE(request: Request) {
 /** create share data on DB */
 export async function POST(request: Request) {
   const requestData = await request.json()
-  const { files } = requestData
+  const { files, totalSize } = requestData
 
   const session = await getServerSession(authOptions)
   const expireTime = new Date()
@@ -82,6 +82,7 @@ export async function POST(request: Request) {
         },
         files: files,
         expires: expireTime,
+        size: totalSize,
       },
     })
   } else {
@@ -89,6 +90,7 @@ export async function POST(request: Request) {
       data: {
         files: files,
         expires: expireTime,
+        size: totalSize,
       },
     })
   }
