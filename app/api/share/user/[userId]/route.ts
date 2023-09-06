@@ -7,8 +7,10 @@ export async function GET(
   request: Request,
   { params }: { params: { userId: string } }
 ) {
-  const session = getServerSession(authOptions)
-  if (!session) return NextResponse.json({ message: "Access Denied" })
+  const session = await getServerSession(authOptions)
+  if (session?.user.id !== params.userId)
+    return NextResponse.json({ message: "Access Denied" })
+
   const { searchParams } = new URL(request.url)
   const page = Number(searchParams.get("page"))
 
