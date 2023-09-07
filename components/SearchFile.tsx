@@ -129,6 +129,8 @@ export default function SearchFile({ ip }: { ip: string | null }) {
     }
   }, [paramsCode, setAlert, setLoading, setValue])
 
+  console.log(ip)
+
   return (
     <div className="flex w-full flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900 ">
       <form className="flex w-full space-x-2" onSubmit={handleSubmit(onSubmit)}>
