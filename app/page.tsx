@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import SearchFile from "@/components/SearchFile"
 import replaceAll from "@/lib/replaceAll"
+import { headers } from "next/headers"
 
 type Props = {
   searchParams: { [key: string]: string | undefined }
@@ -37,13 +38,15 @@ export async function generateMetadata({
 }
 
 export default function Home() {
+  const ip = headers().get("x-forwarded-for")
+
   return (
     <div className=" flex min-h-screen w-full flex-col items-center justify-center p-8 dark:text-white sm:pt-16">
       <div className="flex w-full max-w-xl flex-col items-center justify-center">
         <div className="mr-auto pb-1 pl-2 text-xl font-semibold dark:text-white">
           코드
         </div>
-        <SearchFile />
+        <SearchFile ip={ip} />
       </div>
     </div>
   )

@@ -74,7 +74,7 @@ model shares {
   isLink     Boolean?
   expires    DateTime
   size       Int      @default(0)
-  downloads  Int      @default(0)
+  downloads  String[]
   accessCode String?  @unique
   updated    DateTime @default(now())
   created    DateTime @default(now())

@@ -7,7 +7,6 @@ const FileDownloadButton = ({
   url: string
   filename: string
 }) => {
-  console.log(filename)
   return (
     <a
       href={url}
