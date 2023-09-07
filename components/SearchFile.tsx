@@ -19,7 +19,7 @@ export default function SearchFile({ ip }: { ip: string | null }) {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<Inputs>()
+  } = useForm<Inputs>({ shouldFocusError: false })
 
   const router = useRouter()
 
