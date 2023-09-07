@@ -98,7 +98,7 @@ export default function SearchFile({ ip }: { ip: string | null }) {
       if (ip) {
         const updateLog = await fetch("/api/share/user/access", {
           method: "PUT",
-          body: JSON.stringify({ id: shareInfo.id, ip: ip }),
+          body: JSON.stringify({ id: shareInfo.share.id, ip: ip }),
         })
         const updateResult = await updateLog.json()
         console.log(updateResult)
