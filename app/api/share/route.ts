@@ -49,6 +49,7 @@ export async function DELETE(request: Request) {
           where: { id: targetList[i].id }, // 업데이트할 레코드를 식별하는 필터
           data: {
             accessCode: null, // 업데이트할 필드 및 값
+            size: 0,
           },
         })
       )

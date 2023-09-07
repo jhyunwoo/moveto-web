@@ -2,7 +2,6 @@ import { EnvelopeIcon } from "@heroicons/react/24/outline"
 import Link from "next/link"
 import { Metadata } from "next"
 import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import SignOut from "./SignOut"
 import { ReactNode } from "react"
@@ -49,10 +48,8 @@ function ProPlanText({ children }: { children: ReactNode }) {
 export default async function User() {
   const session = await getServerSession(authOptions)
 
-  if (!session) redirect("/auth/signin")
-
   return (
-    <div className="min-h-screen w-full p-4 pb-24 dark:text-white sm:pt-20">
+    <div className="min-h-screen w-full p-4 pb-24 dark:text-white">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900 sm:col-span-2">
           <div className="mb-1 w-full border-b-2 text-lg text-slate-600 dark:border-slate-500 dark:text-slate-300">
@@ -60,15 +57,15 @@ export default async function User() {
           </div>
           <div className="flex w-full justify-between ">
             <div className="py-1 text-lg font-semibold">
-              {session.user?.name}
+              {session?.user?.name}
             </div>
             <div className="flex items-center justify-center rounded-md bg-green-600 p-1 px-4 text-lg text-white">
-              {session.user?.plan}
+              {session?.user?.plan}
             </div>
           </div>
           <div className="flex items-center space-x-1 ">
             <EnvelopeIcon className="h-5 w-5 text-slate-800 dark:text-slate-200" />
-            <div>{session.user?.email}</div>
+            <div>{session?.user?.email}</div>
           </div>
           <SignOut />
         </div>

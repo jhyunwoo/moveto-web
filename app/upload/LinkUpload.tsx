@@ -1,17 +1,19 @@
 "use client"
 
 import { useForm, SubmitHandler } from "react-hook-form"
-import { useSetRecoilState } from "recoil"
-import { accessCode, alertState, loadingState } from "@/lib/recoil"
+import { useRecoilValue, useSetRecoilState } from "recoil"
+import {
+  accessCode,
+  alertState,
+  loadingState,
+  shareTimeState,
+} from "@/lib/recoil"
 import { useSession } from "next-auth/react"
-import getShareTime from "@/lib/getShareTime"
-import getMaxShareTime from "@/lib/getMaxShareTime"
-import convertMinutesToFormat from "@/lib/convertMinutesToFormat"
+import usePlanLimit from "@/lib/usePlanLimit"
 
 type Inputs = {
   text: string
   isLink: Boolean
-  expires: number
 }
 
 export default function LinkUpload() {
@@ -20,29 +22,39 @@ export default function LinkUpload() {
     handleSubmit,
     formState: { errors },
     watch,
-    setValue,
-  } = useForm<Inputs>({ mode: "onBlur", defaultValues: { expires: 5 } })
+  } = useForm<Inputs>()
 
   const { data: session } = useSession()
 
   const setAccessCode = useSetRecoilState(accessCode)
   const setLoading = useSetRecoilState(loadingState)
   const setAlert = useSetRecoilState(alertState)
+  const shareTime = useRecoilValue(shareTimeState)
+  const { userStorage, userTime, planLimitStatus } = usePlanLimit()
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true)
+    if (shareTime > userTime) {
+      setAlert({
+        message: "최대 공유 시간을 초과하였습니다.",
+        warn: true,
+        error: false,
+      })
+      setLoading(false)
+      return
+    }
     const createShare = await fetch("/api/share/link", {
       method: "POST",
       body: JSON.stringify({
         text: data.text,
         isLink: data.isLink,
-        expires: data.expires,
+        expires: shareTime,
       }),
     })
     const shareInfo = await createShare.json()
     const requestCode = await fetch("/api/word", {
       method: "PUT",
-      body: JSON.stringify({ shareId: shareInfo.id, expires: data.expires }),
+      body: JSON.stringify({ shareId: shareInfo.id, expires: shareTime }),
     })
     const createCode = await requestCode.json()
     if (createCode.result === "error") {
@@ -51,18 +63,11 @@ export default function LinkUpload() {
     setAccessCode(createCode.result.accessCode)
     setLoading(false)
   }
-  function addTime(add: number, current: number) {
-    if (current + add > getMaxShareTime(session)) {
-      setValue("expires", getMaxShareTime(session))
-    } else {
-      setValue("expires", current + add)
-    }
-  }
 
   return (
-    <div className="flex w-full flex-col items-start justify-center py-2 dark:text-white">
+    <div className="flex w-full flex-col items-start justify-center dark:text-white">
       <form
-        className="mt-1 flex w-full flex-col items-center justify-center space-y-2"
+        className="flex w-full flex-col items-center justify-center space-y-2"
         onSubmit={handleSubmit(onSubmit)}
       >
         {watch("isLink") ? (
@@ -89,70 +94,6 @@ export default function LinkUpload() {
           />
         )}
 
-        <div className="flex w-full flex-col rounded-lg border-2 border-green-500 p-2">
-          <input
-            className="w-full bg-slate-100 accent-green-500 dark:bg-slate-800"
-            min={1}
-            max={getMaxShareTime(session)}
-            defaultValue={5}
-            step={1}
-            type="range"
-            {...register("expires", {
-              min: 1,
-              max: getMaxShareTime(session),
-            })}
-          />
-
-          <div className="mt-1 flex flex-col items-start justify-center">
-            <div className="flex w-full space-x-2 text-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  addTime(5, Number(watch("expires")))
-                }}
-                className="rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900"
-              >
-                +5분
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addTime(10, Number(watch("expires")))
-                }}
-                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
-                  !session && "invisible"
-                }`}
-              >
-                +10분
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addTime(30, Number(watch("expires")))
-                }}
-                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
-                  !session && "invisible"
-                }`}
-              >
-                +30분
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addTime(60, Number(watch("expires")))
-                }}
-                className={`rounded-md bg-slate-200 p-1 px-2 transition duration-200 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-green-900 ${
-                  !session && "invisible"
-                }`}
-              >
-                +1시간
-              </button>
-            </div>
-            <div className="ml-auto mt-1 text-sm">
-              {convertMinutesToFormat(watch("expires"))} 동안 공유
-            </div>
-          </div>
-        </div>
         <div className="flex w-full justify-between">
           <div
             className={`mr-auto mt-1 text-sm font-medium text-red-500 dark:text-red-400 ${
@@ -181,10 +122,6 @@ export default function LinkUpload() {
         >
           공유
         </button>
-        <div className="ml-auto mt-2">
-          {session?.user.plan ? session?.user.plan + " Plan" : "Guest"} : 최대{" "}
-          {getShareTime(session?.user.plan)} 동안 공유
-        </div>
       </form>
     </div>
   )

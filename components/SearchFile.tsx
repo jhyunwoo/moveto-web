@@ -13,7 +13,7 @@ type Inputs = {
   accessCode: string
 }
 
-export default function SearchFile() {
+export default function SearchFile({ ip }: { ip: string | null }) {
   const {
     register,
     handleSubmit,
@@ -93,6 +93,13 @@ export default function SearchFile() {
           error: false,
         })
         return
+      }
+
+      if (ip) {
+        await fetch("/api/share/user/access", {
+          method: "PUT",
+          body: JSON.stringify({ id: shareInfo.share.id, ip: ip }),
+        })
       }
 
       if (shareInfo.share.files.length > 0) {

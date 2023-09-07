@@ -25,10 +25,22 @@ const confirmActionState = atom({
   default: { message: "", action: () => {} },
 })
 
+const fileSizeState = atom({
+  key: "fileSizeState",
+  default: 0,
+})
+
+const shareTimeState = atom({
+  key: "shareTimeState",
+  default: 5,
+})
+
 export {
   accessCode,
   alertState,
   loadingState,
   alertWithLinkState,
   confirmActionState,
+  fileSizeState,
+  shareTimeState,
 }
