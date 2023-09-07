@@ -96,10 +96,12 @@ export default function SearchFile({ ip }: { ip: string | null }) {
       }
 
       if (ip) {
-        await fetch("/api/share/user/access", {
+        const updateLog = await fetch("/api/share/user/access", {
           method: "PUT",
           body: JSON.stringify({ id: shareInfo.id, ip: ip }),
         })
+        const updateResult = await updateLog.json()
+        console.log(updateResult)
       }
 
       if (shareInfo.share.files.length > 0) {
