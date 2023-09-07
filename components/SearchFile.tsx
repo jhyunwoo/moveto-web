@@ -96,12 +96,10 @@ export default function SearchFile({ ip }: { ip: string | null }) {
       }
 
       if (ip) {
-        const updateLog = await fetch("/api/share/user/access", {
+        await fetch("/api/share/user/access", {
           method: "PUT",
           body: JSON.stringify({ id: shareInfo.share.id, ip: ip }),
         })
-        const updateResult = await updateLog.json()
-        console.log(updateResult)
       }
 
       if (shareInfo.share.files.length > 0) {
@@ -130,8 +128,6 @@ export default function SearchFile({ ip }: { ip: string | null }) {
       getFileList()
     }
   }, [paramsCode, setAlert, setLoading, setValue])
-
-  console.log(ip)
 
   return (
     <div className="flex w-full flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900 ">
