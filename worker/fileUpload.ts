@@ -128,7 +128,10 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
 
   const totlaFileSize = getTotalFileSize(files)
   let progress = new Array(wholeFileLength).fill(0)
-  setInterval(() => getProgressValue(totlaFileSize, progress), 100)
+  const progressUpdate = setInterval(
+    () => getProgressValue(totlaFileSize, progress),
+    100
+  )
 
   /** Porgress 업데이트 ID */
   let count = 0
@@ -560,4 +563,5 @@ addEventListener("message", async (event: MessageEvent<UploadType>) => {
     largeChunks.shift()
   }
   postMessage({ message: "upload complete", shareId: shareId })
+  clearInterval(progressUpdate)
 })

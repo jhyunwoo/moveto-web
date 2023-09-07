@@ -9,12 +9,9 @@ import LinkUpload from "./LinkUpload"
 import AccessCode from "./AccessCode"
 import { useSession } from "next-auth/react"
 import useStorage from "@/lib/useStorage"
-import getMaxStorageSize from "@/lib/getMaxStorageSize"
 import formatBytes from "@/lib/formatBytes"
 import convertMinutesToFormat from "@/lib/convertMinutesToFormat"
-import getMaxShareTime from "@/lib/getMaxShareTime"
-
-const ONEGB = 1024 * 1024 * 1024
+import usePlanLimit from "@/lib/usePlanLimit"
 
 export default function Upload() {
   const [share, setShare] = useState("File")
@@ -24,22 +21,11 @@ export default function Upload() {
   const [shareTime, setShareTime] = useRecoilState(shareTimeState)
   const fileSize = useRecoilValue(fileSizeState)
   const code = useRecoilValue(accessCode)
-
-  function getMaxUploadSize() {
-    if (session?.user?.plan === "Free") {
-      return ONEGB * 10
-    } else if (session?.user.plan === "Basic") {
-      return ONEGB * 100
-    } else if (session?.user.plan === "Pro") {
-      return ONEGB * 1024
-    } else {
-      return ONEGB
-    }
-  }
+  const { userStorage, userTime, planLimitStatus } = usePlanLimit()
 
   function addTime(add: number) {
-    if (shareTime + add > getMaxShareTime(session)) {
-      setShareTime(getMaxShareTime(session))
+    if (shareTime + add > userTime) {
+      setShareTime(userTime)
     } else {
       setShareTime(shareTime + add)
     }
@@ -47,8 +33,10 @@ export default function Upload() {
 
   return (
     <CenterLayout>
-      {code ? <AccessCode code={code} /> : ""}
-      <div className="flex w-full max-w-xl flex-col items-center justify-center space-y-2 rounded-lg bg-white p-4 shadow-xl dark:bg-slate-900">
+      {code && <AccessCode code={code} />}
+      <div
+        className={`flex w-full max-w-xl flex-col items-center justify-center space-y-2 rounded-lg bg-white p-4 shadow-xl dark:bg-slate-900`}
+      >
         <div className="flex w-full justify-around space-x-1 rounded-full bg-slate-100 p-1 dark:bg-slate-800">
           <button
             type="button"
@@ -74,7 +62,7 @@ export default function Upload() {
           </button>
         </div>
 
-        <div className=" flex w-full flex-col rounded-md border-2 border-green-400 p-2 dark:border-green-500">
+        <div className=" flex w-full flex-col rounded-md p-2">
           <div className="text-lg font-semibold">
             {session?.user.plan ? session?.user.plan + " Plan" : "Guest"}
           </div>
@@ -83,26 +71,28 @@ export default function Upload() {
             {share === "File" ? (
               <div
                 className={`ml-auto text-sm ${
-                  fileSize > getMaxUploadSize()
+                  fileSize > userStorage
                     ? "font-semibold text-red-500"
                     : "text-green-700 dark:text-green-300"
                 }`}
               >
                 총 {formatBytes(fileSize)} / 최대{" "}
-                {formatBytes(getMaxStorageSize(session) - storageData)}
+                {session ? formatBytes(userStorage - storageData) : "100MiB"}
               </div>
             ) : (
-              <div>공유 가능한 텍스트 : 무제한</div>
+              <div className="text-green-700 dark:text-green-300">
+                공유 가능한 텍스트 : 무제한
+              </div>
             )}
           </div>
         </div>
-        <div className="w-full rounded-lg border-2 border-green-500 p-2">
+        <div className="w-full rounded-lg   p-2">
           <div className="flex w-full flex-col">
             <input
               onChange={(data) => setShareTime(Number(data.target.value))}
               className="w-full bg-slate-100 accent-green-500 dark:bg-slate-800"
               min={1}
-              max={getMaxShareTime(session)}
+              max={userTime}
               value={shareTime}
               step={1}
               type="range"

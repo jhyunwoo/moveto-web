@@ -18,25 +18,17 @@ import {
   loadingState,
   shareTimeState,
 } from "@/lib/recoil"
-import { useSession } from "next-auth/react"
 import Progress from "./Progress"
-import getShareTime from "@/lib/getShareTime"
 import getTotalFileSize from "@/lib/getTotalFileSize"
 import getFileNameList from "@/lib/getFileNameList"
-import { SubmitHandler, useForm } from "react-hook-form"
-import getMaxShareTime from "@/lib/getMaxShareTime"
-import convertMinutesToFormat from "@/lib/convertMinutesToFormat"
-
-const ONEMB = 1024 * 1024
-const ONEGB = 1024 * ONEMB
+import usePlanLimit from "@/lib/usePlanLimit"
 
 export default function FileUpload() {
-  const { data: session, status } = useSession()
   const [files, setFiles] = useState<File[]>([])
-  const [maxFileSize, setMaxFileSize] = useState<number>(ONEGB) // 1GB
   const [progress, setProgress] = useState(0)
   const [progressMessage, setProgressMessage] = useState("")
   const [fileSize, setFileSize] = useRecoilState(fileSizeState)
+  const { userStorage, userTime, planLimitStatus } = usePlanLimit()
 
   const setAccessCode = useSetRecoilState(accessCode)
   const setAlert = useSetRecoilState(alertState)
@@ -48,7 +40,16 @@ export default function FileUpload() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (shareTime > getMaxShareTime(session)) {
+    if (files.length === 0) {
+      setAlert({
+        message: "파일을 업로드 해주세요.",
+        warn: true,
+        error: false,
+      })
+      setLoading(false)
+      return
+    }
+    if (shareTime > userTime) {
       setAlert({
         message: "최대 공유 시간을 초과하였습니다.",
         warn: true,
@@ -58,7 +59,7 @@ export default function FileUpload() {
       return
     }
     setLoading(true)
-    if (fileSize > maxFileSize) {
+    if (fileSize > userStorage) {
       setAlert({
         message: "업로드 가능한 크기를 초과하였습니다.",
         warn: true,
@@ -159,17 +160,6 @@ export default function FileUpload() {
     }
   }, [])
 
-  // 플랜별 업로드 가능 크기 설정
-  useEffect(() => {
-    if (session?.user?.plan === "Free") {
-      setMaxFileSize(ONEGB * 10)
-    } else if (session?.user.plan === "Basic") {
-      setMaxFileSize(ONEGB * 100)
-    } else if (session?.user.plan === "Pro") {
-      setMaxFileSize(ONEGB * 1024)
-    }
-  }, [session])
-
   // 입력 받은 파일 크기 합 구하는 useEffect
   useEffect(() => setFileSize(getTotalFileSize(files)), [files])
 
@@ -185,7 +175,7 @@ export default function FileUpload() {
         ""
       )}
 
-      <div className="mb-2 flex w-full flex-col items-start justify-start">
+      <div className=" flex w-full flex-col items-start justify-start">
         <div className="flex w-full justify-start">
           <input
             type="file"
@@ -224,14 +214,12 @@ export default function FileUpload() {
         ))}
       </div>
 
-      {files.length > 0 && (
-        <button
-          type="submit"
-          className="rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700"
-        >
-          파일 업로드
-        </button>
-      )}
+      <button
+        type="submit"
+        className="rounded-lg bg-green-600 p-1 px-4 font-semibold text-white ring-2 ring-green-600 transition duration-150 hover:bg-green-700 hover:ring-green-700 sm:p-2"
+      >
+        파일 공유
+      </button>
     </form>
   )
 }

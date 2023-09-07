@@ -38,7 +38,7 @@ export async function generateMetadata({
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center p-8 dark:text-white sm:pt-16">
+    <div className=" flex min-h-screen w-full flex-col items-center justify-center p-8 dark:text-white sm:pt-16">
       <div className="flex w-full max-w-xl flex-col items-center justify-center">
         <div className="mr-auto pb-1 pl-2 text-xl font-semibold dark:text-white">
           코드

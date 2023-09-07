@@ -9,7 +9,7 @@ import {
   shareTimeState,
 } from "@/lib/recoil"
 import { useSession } from "next-auth/react"
-import getMaxShareTime from "@/lib/getMaxShareTime"
+import usePlanLimit from "@/lib/usePlanLimit"
 
 type Inputs = {
   text: string
@@ -22,7 +22,7 @@ export default function LinkUpload() {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<Inputs>({ mode: "onBlur" })
+  } = useForm<Inputs>()
 
   const { data: session } = useSession()
 
@@ -30,10 +30,11 @@ export default function LinkUpload() {
   const setLoading = useSetRecoilState(loadingState)
   const setAlert = useSetRecoilState(alertState)
   const shareTime = useRecoilValue(shareTimeState)
+  const { userStorage, userTime, planLimitStatus } = usePlanLimit()
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true)
-    if (shareTime > getMaxShareTime(session)) {
+    if (shareTime > userTime) {
       setAlert({
         message: "최대 공유 시간을 초과하였습니다.",
         warn: true,
@@ -64,9 +65,9 @@ export default function LinkUpload() {
   }
 
   return (
-    <div className="flex w-full flex-col items-start justify-center py-2 dark:text-white">
+    <div className="flex w-full flex-col items-start justify-center dark:text-white">
       <form
-        className="mt-1 flex w-full flex-col items-center justify-center space-y-2"
+        className="flex w-full flex-col items-center justify-center space-y-2"
         onSubmit={handleSubmit(onSubmit)}
       >
         {watch("isLink") ? (
