@@ -17,13 +17,11 @@ import getShareTime from "@/lib/getShareTime"
 export default function Upload() {
   const [share, setShare] = useState("File")
   const { data: session, status } = useSession()
-  const { storageData, storageError, storageLoading, storageMutate } =
-    useStorage()
+  const { storageData, storageLoading } = useStorage()
   const [shareTime, setShareTime] = useRecoilState(shareTimeState)
   const fileSize = useRecoilValue(fileSizeState)
   const code = useRecoilValue(accessCode)
   const { userStorage, userTime, planLimitStatus } = usePlanLimit()
-
   function addTime(add: number) {
     if (shareTime + add > userTime) {
       setShareTime(userTime)
@@ -65,7 +63,7 @@ export default function Upload() {
 
         <div className=" flex w-full flex-col rounded-md p-2">
           {status === "loading" ? (
-            <div className="mb-1 h-6 w-full animate-pulse rounded-md bg-slate-700 text-lg font-semibold" />
+            <div className="mb-1 h-6 w-full animate-pulse rounded-md bg-slate-200 text-lg font-semibold dark:bg-slate-700" />
           ) : (
             <div className="text-lg font-semibold">
               {session?.user.plan ? session?.user.plan + " Plan" : "Guest"}
@@ -73,13 +71,13 @@ export default function Upload() {
           )}
           <div className="ml-auto flex flex-col items-end text-sm">
             {status === "loading" || !planLimitStatus ? (
-              <div className="mb-1 h-4 w-32 animate-pulse rounded-md bg-slate-700" />
+              <div className="mb-1 h-4 w-32 animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
             ) : (
               <div>최대 {getShareTime(session?.user.plan)} 동안 공유</div>
             )}
             {share === "File" ? (
               status === "loading" || storageLoading || !planLimitStatus ? (
-                <div className="mb-1 h-4 w-40 animate-pulse rounded-md bg-slate-700" />
+                <div className="mb-1 h-4 w-40 animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
               ) : (
                 <div
                   className={`ml-auto text-sm ${
@@ -101,7 +99,7 @@ export default function Upload() {
         </div>
         <div className="w-full rounded-lg   p-2">
           {status === "loading" || !planLimitStatus ? (
-            <div className="mt-1 h-16 w-full animate-pulse rounded-md bg-slate-700" />
+            <div className="mt-1 h-16 w-full animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" />
           ) : (
             <div className="flex w-full flex-col">
               <input
