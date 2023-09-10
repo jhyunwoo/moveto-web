@@ -7,7 +7,7 @@ import SignOut from "./SignOut"
 import { ReactNode } from "react"
 
 export const metadata: Metadata = {
-  title: "모베토 | 프로필",
+  title: "Moveto | 프로필",
   description: "쉽고 빠른 파일 전송",
 }
 

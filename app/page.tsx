@@ -28,10 +28,10 @@ export async function generateMetadata({
     }
 
     return {
-      title: "모베토" + (c ? " | " + c : ""),
+      title: "Moveto" + (c ? " | " + c : ""),
       description: "로그인 없이 쉽고 빠른 파일 공유",
       openGraph: {
-        title: "모베토" + (c ? " | " + c : ""),
+        title: "Moveto" + (c ? " | " + c : ""),
         description: "로그인 없이 쉽고 빠른 파일 공유",
         images: ogImage(c),
       },
@@ -39,10 +39,10 @@ export async function generateMetadata({
   } catch (e) {
     console.error(e)
     return {
-      title: "모베토",
+      title: "Moveto",
       description: "로그인 없이 쉽고 빠른 파일 공유",
       openGraph: {
-        title: "모베토",
+        title: "Moveto",
         description: "로그인 없이 쉽고 빠른 파일 공유",
         images: ["/images/moveto-og.png"],
       },
