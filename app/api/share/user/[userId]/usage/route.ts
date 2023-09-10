@@ -19,7 +19,7 @@ export async function GET(
   })
   let totalUsage = 0
   for (let i = 0; i < storageUsage.length; i += 1) {
-    totalUsage += storageUsage[i].size
+    totalUsage += Number(storageUsage[i].size)
   }
   return NextResponse.json({ totalUsage: totalUsage })
 }
