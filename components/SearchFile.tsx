@@ -124,8 +124,12 @@ export default function SearchFile({ ip }: { ip: string | null }) {
     }
 
     if (paramsCode) {
-      setValue("accessCode", paramsCode)
-      getFileList()
+      try {
+        setValue("accessCode", paramsCode)
+        getFileList()
+      } catch (e) {
+        console.error(e)
+      }
     }
   }, [paramsCode, setAlert, setLoading, setValue])
 

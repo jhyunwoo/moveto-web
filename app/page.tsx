@@ -7,33 +7,46 @@ type Props = {
   searchParams: { [key: string]: string | undefined }
 }
 
+function ogImage(c: string) {
+  if (c) {
+    return [`/api/og/image?code=${escape(replaceAll(c, "\\", "%"))}`]
+  }
+  return ["/images/moveto-og.png"]
+}
+
 export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {
-  let { c } = searchParams
+  try {
+    let { c } = searchParams
 
-  if (c) {
-    c = c.replace("_", " ")
-  }
-  if (c === undefined) {
-    c = ""
-  }
-
-  function ogImage() {
     if (c) {
-      return [`/api/og/image?code=${escape(replaceAll(c, "\\", "%"))}`]
+      c = c.replace("_", " ")
     }
-    return ["/images/moveto-og.png"]
-  }
+    if (c === undefined) {
+      c = ""
+    }
 
-  return {
-    title: "모베토" + (c ? " | " + c : ""),
-    description: "로그인 없이 쉽고 빠른 파일 공유",
-    openGraph: {
+    return {
       title: "모베토" + (c ? " | " + c : ""),
       description: "로그인 없이 쉽고 빠른 파일 공유",
-      images: ogImage(),
-    },
+      openGraph: {
+        title: "모베토" + (c ? " | " + c : ""),
+        description: "로그인 없이 쉽고 빠른 파일 공유",
+        images: ogImage(c),
+      },
+    }
+  } catch (e) {
+    console.error(e)
+    return {
+      title: "모베토",
+      description: "로그인 없이 쉽고 빠른 파일 공유",
+      openGraph: {
+        title: "모베토",
+        description: "로그인 없이 쉽고 빠른 파일 공유",
+        images: ["/images/moveto-og.png"],
+      },
+    }
   }
 }
 
