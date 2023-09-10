@@ -10,16 +10,16 @@ import MenuBar from "@/components/MenuBar"
 import Footer from "@/components/Footer"
 
 export const metadata: Metadata = {
-  title: "모베토",
+  title: "Moveto",
   description: "쉽고 빠른 파일 공유",
   metadataBase: new URL("https://www.moveto.kr"),
   openGraph: {
-    title: "모베토",
+    title: "Moveto",
     description: "쉽고 빠른 파일 공유",
     images: "/images/moveto-og.png",
     type: "website",
     url: "https://www.moveto.kr",
-    siteName: "모베토",
+    siteName: "Moveto",
     locale: "ko_KR",
   },
   manifest: "/manifest.json",

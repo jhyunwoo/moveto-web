@@ -4,10 +4,10 @@ import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
-  title: "모베토 | 플랜 변경",
+  title: "Moveto | 플랜 변경",
   description: "쉽고 빠른 파일 공유",
   openGraph: {
-    title: "모베토 | 플랜 변경",
+    title: "Moveto | 플랜 변경",
     description: "쉽고 빠른 파일 공유",
   },
 }
