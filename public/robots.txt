@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.moveto.kr
+
+# Sitemaps
+Sitemap: https://www.moveto.kr/sitemap.xml
