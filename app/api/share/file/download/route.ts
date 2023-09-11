@@ -5,7 +5,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 /** Get file download link from R2 */
 export async function POST(request: Request) {
   const requestData = await request.json()
-  const { files } = requestData
+  const { shareInfo } = requestData
 
   const S3 = new S3Client({
     region: "auto",
@@ -16,18 +16,17 @@ export async function POST(request: Request) {
     },
   })
   const signedUrls: string[] = []
-  for (let i = 0; i < files.share.files.length; i += 1) {
+  for (let i = 0; i < shareInfo.files.length; i += 1) {
     const presignedUrl = await getSignedUrl(
       S3,
       new GetObjectCommand({
         Bucket: "moveto-bucket",
-        Key: files.share.id + "/" + files.share.files[i],
-        ResponseContentDisposition: `attachment; filename="${files.share.files[i]}"`,
+        Key: shareInfo.id + "/" + shareInfo.files[i],
+        ResponseContentDisposition: `attachment; filename="${shareInfo.files[i]}"`,
       }),
       { expiresIn: 3600 }
     )
     signedUrls.push(presignedUrl)
   }
-
   return NextResponse.json({ urls: signedUrls })
 }

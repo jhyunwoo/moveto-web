@@ -12,7 +12,7 @@ export default async function SignIn() {
 
   return (
     <CenterLayout>
-      <div className="-mt-20 flex w-full max-w-lg flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900">
+      <div className="flex w-full max-w-lg flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900">
         <div className="p-4 text-2xl font-bold dark:text-white">로그인</div>
         <div className="flex w-full flex-col space-y-2">
           <SignInButton

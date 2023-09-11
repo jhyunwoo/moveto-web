@@ -24,13 +24,11 @@ export default function LinkUpload() {
     watch,
   } = useForm<Inputs>()
 
-  const { data: session } = useSession()
-
   const setAccessCode = useSetRecoilState(accessCode)
   const setLoading = useSetRecoilState(loadingState)
   const setAlert = useSetRecoilState(alertState)
   const shareTime = useRecoilValue(shareTimeState)
-  const { userStorage, userTime, planLimitStatus } = usePlanLimit()
+  const { userTime, planLimitStatus } = usePlanLimit()
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true)
@@ -54,13 +52,13 @@ export default function LinkUpload() {
     const shareInfo = await createShare.json()
     const requestCode = await fetch("/api/word", {
       method: "PUT",
-      body: JSON.stringify({ shareId: shareInfo.id, expires: shareTime }),
+      body: JSON.stringify({ shareId: shareInfo, expires: shareTime }),
     })
     const createCode = await requestCode.json()
     if (createCode.result === "error") {
       setAlert({ message: "텍스트 공유 실패", warn: false, error: true })
     }
-    setAccessCode(createCode.result.accessCode)
+    setAccessCode(createCode)
     setLoading(false)
   }
 

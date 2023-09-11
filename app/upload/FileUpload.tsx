@@ -80,7 +80,7 @@ export default function FileUpload() {
     const result = await createShare.json()
 
     // worker에 업로드 요청
-    handleWorker({ shareId: result.id })
+    handleWorker({ shareId: result })
   }
 
   /** input 태그에 파일 값 변경시 filse state에 새로운 파일만 값 저장 */
@@ -129,7 +129,7 @@ export default function FileUpload() {
       body: JSON.stringify({ shareId: shareId, expires: shareTime }),
     })
     const codeData = await requestCode.json()
-    setAccessCode(codeData.result.accessCode)
+    setAccessCode(codeData)
     setFiles([])
     if (fileInputRef.current) fileInputRef.current.value = ""
     setProgressMessage("")

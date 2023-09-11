@@ -12,9 +12,15 @@ export async function GET(request: Request) {
 
   const findCode = await prisma.shares.findFirst({
     where: { accessCode: accessCode },
+    select: {
+      id: true,
+      files: true,
+      text: true,
+      isLink: true,
+    },
   })
 
-  return NextResponse.json({ share: findCode })
+  return NextResponse.json(findCode)
 }
 
 export async function DELETE(request: Request) {
@@ -83,7 +89,7 @@ export async function POST(request: Request) {
         },
         files: files,
         expires: expireTime,
-        size: totalSize,
+        size: BigInt(totalSize),
       },
     })
   } else {
@@ -91,11 +97,11 @@ export async function POST(request: Request) {
       data: {
         files: files,
         expires: expireTime,
-        size: totalSize,
+        size: BigInt(totalSize),
       },
     })
   }
-  return NextResponse.json(createShare)
+  return NextResponse.json(createShare.id)
 }
 
 /** request abort upload files */
