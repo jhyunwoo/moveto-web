@@ -34,5 +34,5 @@ export async function POST(request: Request) {
     })
   }
 
-  return NextResponse.json(createLink)
+  return NextResponse.json(createLink.id)
 }

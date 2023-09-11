@@ -85,7 +85,7 @@ export default function SearchFile({ ip }: { ip: string | null }) {
         method: "GET",
       })
       const shareInfo = await request.json()
-      if (!shareInfo.share) {
+      if (!shareInfo) {
         setLoading(false)
         setAlert({
           message: "접근 코드가 올바르지 않습니다.",
@@ -98,27 +98,24 @@ export default function SearchFile({ ip }: { ip: string | null }) {
       if (ip) {
         await fetch("/api/share/user/access", {
           method: "PUT",
-          body: JSON.stringify({ id: shareInfo.share.id, ip: ip }),
+          body: JSON.stringify({ id: shareInfo.id, ip: ip }),
         })
       }
 
-      if (shareInfo.share.files.length > 0) {
+      if (shareInfo.files.length > 0) {
         const download = await fetch("api/share/file/download", {
           method: "POST",
-          body: JSON.stringify({ files: shareInfo }),
-          headers: {
-            "Content-Type": "application/json",
-          },
+          body: JSON.stringify({ shareInfo: shareInfo }),
         })
         const signedUrl = await download.json()
 
         setFileUrl(signedUrl.urls)
-        setFileNames(shareInfo.share.files)
+        setFileNames(shareInfo.files)
         setText("")
-      } else if (shareInfo.share.text) {
+      } else if (shareInfo.text) {
         setFileNames([])
-        setText(shareInfo.share.text)
-        setIsLink(shareInfo.share.isLink)
+        setText(shareInfo.text)
+        setIsLink(shareInfo.isLink)
       }
       setLoading(false)
     }
@@ -131,7 +128,7 @@ export default function SearchFile({ ip }: { ip: string | null }) {
         console.error(e)
       }
     }
-  }, [paramsCode, setAlert, setLoading, setValue])
+  }, [ip, paramsCode, setAlert, setLoading, setValue])
 
   return (
     <div className="flex w-full flex-col rounded-lg bg-white p-3 shadow-lg dark:bg-slate-900 ">

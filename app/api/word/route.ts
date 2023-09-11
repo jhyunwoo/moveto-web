@@ -49,7 +49,7 @@ export async function PUT(request: Request) {
       },
     })
 
-    return NextResponse.json({ result: updateShare })
+    return NextResponse.json(updateShare.accessCode)
   } catch {
     return NextResponse.json({ result: "error" }, { status: 500 })
   }

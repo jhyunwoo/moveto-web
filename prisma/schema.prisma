@@ -73,7 +73,7 @@ model shares {
   text       String?
   isLink     Boolean?
   expires    DateTime
-  size       BigInt?
+  size       BigInt?  @default(0)
   downloads  String[]
   accessCode String?  @unique
   updated    DateTime @default(now())

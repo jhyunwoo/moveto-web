@@ -24,6 +24,16 @@ export async function GET(
       },
       take: 50,
       skip: 50 * (page - 1),
+      select: {
+        id: true,
+        files: true,
+        text: true,
+        isLink: true,
+        expires: true,
+        accessCode: true,
+        updated: true,
+        created: true,
+      },
     })
     const shareLength = await prisma.shares.count({
       where: {
@@ -32,6 +42,9 @@ export async function GET(
     })
     return NextResponse.json({ data: shareHistory, length: shareLength })
   } catch {
-    return NextResponse.json({ message: "Can not find share history" })
+    return NextResponse.json(
+      { message: "Can not find share history" },
+      { status: 500 }
+    )
   }
 }
