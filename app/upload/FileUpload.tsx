@@ -119,25 +119,24 @@ export default function FileUpload() {
     workerRef.current?.postMessage({ files: files, shareId: shareId })
   }
 
-  /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
-  async function finishUpload(shareId: string) {
-    setLoading(false)
-    setProgress(100)
-    setProgressMessage("업로드 완료")
-    const requestCode = await fetch("/api/word", {
-      method: "PUT",
-      body: JSON.stringify({ shareId: shareId, expires: shareTime }),
-    })
-    const codeData = await requestCode.json()
-    setAccessCode(codeData)
-    setFiles([])
-    if (fileInputRef.current) fileInputRef.current.value = ""
-    setProgressMessage("")
-    setProgress(0)
-  }
-
   // worker 설정 useEffect
   useEffect(() => {
+    /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
+    async function finishUpload(shareId: string, expireTime: number) {
+      setLoading(false)
+      setProgress(100)
+      setProgressMessage("업로드 완료")
+      const requestCode = await fetch("/api/word", {
+        method: "PUT",
+        body: JSON.stringify({ shareId: shareId, expires: expireTime }),
+      })
+      const codeData = await requestCode.json()
+      setAccessCode(codeData)
+      setFiles([])
+      if (fileInputRef.current) fileInputRef.current.value = ""
+      setProgressMessage("")
+      setProgress(0)
+    }
     workerRef.current = new Worker(
       new URL("worker/fileUpload.ts", import.meta.url)
     )
@@ -152,13 +151,14 @@ export default function FileUpload() {
         console.log(event.data.log)
       }
       if (event.data.message === "upload complete") {
-        finishUpload(event.data.shareId)
+        console.log(shareTime)
+        finishUpload(event.data.shareId, shareTime)
       }
     }
     return () => {
       workerRef.current?.terminate()
     }
-  }, [])
+  }, [setAccessCode, setLoading, shareTime])
 
   // 입력 받은 파일 크기 합 구하는 useEffect
   useEffect(() => setFileSize(getTotalFileSize(files)), [files])
