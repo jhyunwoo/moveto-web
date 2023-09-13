@@ -8,7 +8,6 @@ import {
   loadingState,
   shareTimeState,
 } from "@/lib/recoil"
-import { useSession } from "next-auth/react"
 import usePlanLimit from "@/lib/usePlanLimit"
 
 type Inputs = {

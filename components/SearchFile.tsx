@@ -3,7 +3,6 @@
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { useEffect, useState } from "react"
-import { nanoid } from "nanoid"
 import { useSetRecoilState } from "recoil"
 import { alertState, loadingState } from "@/lib/recoil"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -178,7 +177,7 @@ export default function SearchFile({ ip }: { ip: string | null }) {
           <div className="mt-2 flex w-full flex-col space-y-2">
             {fileNames.map((data, key) => (
               <div
-                key={nanoid()}
+                key={key}
                 className="flex w-full items-center justify-between border-t-2 p-2 dark:border-slate-500"
               >
                 <div className="basis-5/6 break-all pr-1 text-sm">{data}</div>

@@ -2,7 +2,6 @@
 
 import planColor from "@/lib/planColor"
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline"
-import { nanoid } from "nanoid"
 import Link from "next/link"
 import DeleteShare from "./DeleteShare"
 import { useSession } from "next-auth/react"
@@ -69,7 +68,7 @@ export default function SharesData() {
         {sharesData?.map((data: any) => (
           <section
             className="flex w-full flex-col items-start justify-center border-b-2 p-1 dark:border-slate-500"
-            key={nanoid()}
+            key={data.id}
           >
             {data.files.length > 0 ? (
               <div className=" font-semibold">
