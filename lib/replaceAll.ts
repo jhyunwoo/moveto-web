@@ -1,3 +1,4 @@
+/** 입력한 문자의 strValue1을 모두 strValue2로 변경 */
 export default function replaceAll(
   strTemp: string,
   strValue1: string,

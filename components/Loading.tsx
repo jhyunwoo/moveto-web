@@ -16,6 +16,6 @@ export default function Loading() {
       </div>
     )
   } else {
-    return <> </>
+    return <></>
   }
 }

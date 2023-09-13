@@ -8,7 +8,6 @@ import React, {
   useEffect,
   FormEvent,
 } from "react"
-import { nanoid } from "nanoid"
 import { TrashIcon } from "@heroicons/react/24/outline"
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import {
@@ -196,7 +195,7 @@ export default function FileUpload() {
       <div className="flex flex-col ">
         {files.map((data, key) => (
           <section
-            key={nanoid()}
+            key={key}
             className=" flex items-center justify-between border-b-2 p-2  last:border-b-0 dark:border-slate-500"
           >
             <div className="flex flex-col justify-center text-sm font-semibold">
