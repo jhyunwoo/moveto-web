@@ -18,8 +18,6 @@ export default async function UploadLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getServerSession(authOptions)
-  if (!session) redirect("/auth/signin")
 
   return <section>{children}</section>
 }
