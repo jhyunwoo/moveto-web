@@ -75,7 +75,7 @@ export default async function User() {
         >
           <div className="text-lg font-semibold">공유 기록</div>
         </Link>
-        <div className="flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900 sm:col-span-2">
+        <div className="invisible flex flex-col items-start justify-center space-y-1 rounded-lg bg-white p-4 shadow-lg dark:bg-slate-900 sm:col-span-2">
           <div className="grid w-full grid-cols-4 place-content-center content-center items-stretch gap-1">
             {/* Plan */}
             <div className="col-span-4 pb-3 text-center text-xl font-bold">
