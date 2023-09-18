@@ -104,7 +104,7 @@ export default function Upload() {
             <div className="flex w-full flex-col">
               <input
                 onChange={(data) => setShareTime(Number(data.target.value))}
-                className="w-full bg-slate-100 accent-green-500 dark:bg-slate-800"
+                className="w-full bg-slate-100 accent-green-500 transition duration-200 dark:bg-slate-800"
                 min={1}
                 max={userTime}
                 value={shareTime}
