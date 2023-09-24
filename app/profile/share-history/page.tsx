@@ -71,7 +71,7 @@ export default function SharesData() {
             key={data.id}
           >
             {data.files.length > 0 ? (
-              <div className=" font-semibold">
+              <div className=" break-all font-semibold">
                 {data.files[0]}
                 {data.files.length === 1
                   ? ""
@@ -83,12 +83,12 @@ export default function SharesData() {
                 className="w-full"
                 href={data?.text ? data.text : ""}
               >
-                <div className="break-words font-semibold text-blue-600 decoration-blue-600 hover:underline">
+                <div className="break-words break-all font-semibold text-blue-600 decoration-blue-600 hover:underline">
                   {data.text}
                 </div>
               </a>
             ) : (
-              <div className="mb-1 break-words rounded-md bg-slate-100 p-1 px-2 font-semibold dark:bg-slate-800">
+              <div className="mb-1 break-words break-all rounded-md bg-slate-100 p-1 px-2 font-semibold dark:bg-slate-800">
                 {data.text}
               </div>
             )}

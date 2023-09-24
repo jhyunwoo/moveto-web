@@ -23,12 +23,15 @@ export async function GET(request: Request) {
   return NextResponse.json(findCode)
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: Request): Promise<Response> {
   const requestData = await request.json()
   const { id, password } = requestData
 
   if (id !== process.env.DELETE_ID || password !== process.env.DELETE_PASSWORD)
-    return NextResponse.json({ fileKeys: "auth error" })
+    return new Response(JSON.stringify({ fileKeys: "auth error" }), {
+      status: 401,
+    })
+
   const currentTime = new Date()
   const shareList = await prisma.shares.findMany({
     where: {
@@ -41,7 +44,7 @@ export async function DELETE(request: Request) {
   let targetList: any[] = []
 
   for (let i = 0; i < shareList.length; i += 1) {
-    if (shareList[i].expires == null) return
+    if (shareList[i].expires == null) return new Response(null, { status: 500 })
     if (shareList[i].expires < currentTime) {
       targetList.push(shareList[i])
     }
@@ -64,10 +67,12 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const result = await prisma.$transaction(makeQuery())
-    return NextResponse.json({ fileKeys: targetList })
+    await prisma.$transaction(makeQuery())
+    return new Response(JSON.stringify({ fileKeys: targetList }), {
+      status: 200,
+    })
   } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+    return new Response(JSON.stringify({ message: e }), { status: 500 })
   }
 }
 
