@@ -8,6 +8,7 @@ import AlertWithLink from "@/components/AlertWithLink"
 import Loading from "@/components/Loading"
 import MenuBar from "@/components/MenuBar"
 import Footer from "@/components/Footer"
+import { ReactNode } from "react"
 
 export const metadata: Metadata = {
   title: "Moveto",
@@ -247,11 +248,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="kr" className="bg-slate-50 dark:bg-slate-950">
       <body>

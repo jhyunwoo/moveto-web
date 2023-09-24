@@ -1,3 +1,5 @@
+"use client"
+
 import {
   ArchiveBoxArrowDownIcon,
   ArrowRightOnRectangleIcon,
@@ -5,12 +7,11 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline"
 import MenuBarButton from "./MenuBarButton"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
-export default async function MenuBar() {
-  const session = await getServerSession(authOptions)
+export default function MenuBar() {
+  const { status } = useSession()
 
   return (
     <div className="fixed bottom-0 z-10 flex w-full items-end justify-center p-2 sm:bottom-auto sm:top-0 sm:items-start  sm:justify-between sm:p-0">
@@ -29,12 +30,19 @@ export default async function MenuBar() {
           <ArchiveBoxArrowDownIcon className="h-6 w-6 " />
           <p>다운로드</p>
         </MenuBarButton>
-        {session ? (
+        {status === "authenticated" && (
           <MenuBarButton href="/profile">
             <UserCircleIcon className="h-6 w-6 " />
             <p>프로필</p>
           </MenuBarButton>
-        ) : (
+        )}
+        {status === "loading" && (
+          <MenuBarButton href="/profile">
+            <UserCircleIcon className="h-6 w-6 " />
+            <p>Loading...</p>
+          </MenuBarButton>
+        )}
+        {status === "unauthenticated" && (
           <MenuBarButton href="/auth/signin">
             <ArrowRightOnRectangleIcon className="h-6 w-6 " />
             <p>로그인</p>
