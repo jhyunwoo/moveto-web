@@ -120,46 +120,42 @@ export default function FileUpload() {
 
   // worker 설정 useEffect
   useEffect(() => {
-    try {
-      /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
-      async function finishUpload(shareId: string, expireTime: number) {
-        setLoading(false)
-        setProgress(100)
-        setProgressMessage("업로드 완료")
-        const requestCode = await fetch("/api/word", {
-          method: "PUT",
-          body: JSON.stringify({ shareId: shareId, expires: expireTime }),
-        })
-        const codeData = await requestCode.json()
-        setAccessCode(codeData)
-        setFiles([])
-        if (fileInputRef.current) fileInputRef.current.value = ""
-        setProgressMessage("")
-        setProgress(0)
-      }
-      workerRef.current = new Worker(
-        new URL("worker/fileUpload.ts", import.meta.url)
-      )
-      workerRef.current.onmessage = (event: MessageEvent<any>) => {
-        if (event.data.progress) {
-          if (event.data.progress > 0) {
-            setLoading(false)
-          }
-          setProgress(event.data.progress)
+    /** 파일 업로드 완료 후 실행하는 함수, 모든 값을 초기화 하고 접근 코드 요청하여 보여줌 */
+    async function finishUpload(shareId: string, expireTime: number) {
+      setLoading(false)
+      setProgress(100)
+      setProgressMessage("업로드 완료")
+      const requestCode = await fetch("/api/word", {
+        method: "PUT",
+        body: JSON.stringify({ shareId: shareId, expires: expireTime }),
+      })
+      const codeData = await requestCode.json()
+      setAccessCode(codeData)
+      setFiles([])
+      if (fileInputRef.current) fileInputRef.current.value = ""
+      setProgressMessage("")
+      setProgress(0)
+    }
+    workerRef.current = new Worker(
+      new URL("worker/fileUpload.ts", import.meta.url)
+    )
+    workerRef.current.onmessage = (event: MessageEvent<any>) => {
+      if (event.data.progress) {
+        if (event.data.progress > 0) {
+          setLoading(false)
         }
-        if (event.data.message === "error") {
-          console.log(event.data.log)
-        }
-        if (event.data.message === "upload complete") {
-          console.log(shareTime)
-          finishUpload(event.data.shareId, shareTime)
-        }
+        setProgress(event.data.progress)
       }
-      return () => {
-        workerRef.current?.terminate()
+      if (event.data.message === "error") {
+        console.log(event.data.log)
       }
-    } catch {
-      console.log("worker error")
+      if (event.data.message === "upload complete") {
+        console.log(shareTime)
+        finishUpload(event.data.shareId, shareTime)
+      }
+    }
+    return () => {
+      workerRef.current?.terminate()
     }
   }, [setAccessCode, setLoading, shareTime])
 

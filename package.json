@@ -19,7 +19,7 @@
     "@ducanh2912/next-pwa": "^9",
     "@heroicons/react": "^2",
     "@next-auth/prisma-adapter": "^1",
-    "@prisma/client": "^5",
+    "@prisma/client": "^5.5.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -45,7 +45,7 @@
     "eslint-config-prettier": "^8",
     "prettier": "^3",
     "prettier-plugin-tailwindcss": "^0",
-    "prisma": "^5",
+    "prisma": "^5.5.2",
     "webpack": "^5"
   }
 }
