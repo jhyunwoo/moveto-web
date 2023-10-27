@@ -24,7 +24,6 @@ export const metadata: Metadata = {
     locale: "ko_KR",
   },
   manifest: "/manifest.json",
-  themeColor: "#ffffff",
   icons: {
     icon: [
       {
