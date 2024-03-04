@@ -137,7 +137,7 @@ export default function FileUpload() {
       setProgress(0)
     }
     workerRef.current = new Worker(
-      new URL("http://localhost:3000/file-upload.ts", import.meta.url)
+      new URL(`${process.env.NEXTAUTH_URL}/file-upload.ts`, import.meta.url)
     )
     workerRef.current.onmessage = (event: MessageEvent<any>) => {
       if (event.data.progress) {
