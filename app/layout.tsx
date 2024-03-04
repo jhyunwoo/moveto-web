@@ -9,6 +9,7 @@ import Loading from "@/components/Loading"
 import MenuBar from "@/components/MenuBar"
 import Footer from "@/components/Footer"
 import { ReactNode } from "react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: "Moveto",
@@ -260,6 +261,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Alert />
             <AlertWithLink />
             <Loading />
+            <SpeedInsights/>
           </Recoil>
         </AuthProvider>
       </body>
