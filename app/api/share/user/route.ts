@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { DeleteObjectsCommand, S3Client } from "@aws-sdk/client-s3"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
-import { authOptions } from "../../auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth-options"
 
 export async function DELETE(request: Request) {
   const session = await getServerSession(authOptions)

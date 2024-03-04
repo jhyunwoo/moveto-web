@@ -2,9 +2,9 @@ import { EnvelopeIcon } from "@heroicons/react/24/outline"
 import Link from "next/link"
 import { Metadata } from "next"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../api/auth/[...nextauth]/route"
 import SignOut from "./SignOut"
 import { ReactNode } from "react"
+import { authOptions } from "@/lib/auth-options"
 
 export const metadata: Metadata = {
   title: "Moveto | 프로필",

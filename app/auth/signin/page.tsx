@@ -1,10 +1,10 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import CenterLayout from "@/components/CenterLayout"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import SignInButton from "./SignInButton"
 import Link from "next/link"
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline"
+import { authOptions } from "@/lib/auth-options"
 
 export default async function SignIn() {
   const session = await getServerSession(authOptions)
