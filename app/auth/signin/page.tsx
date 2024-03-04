@@ -20,11 +20,11 @@ export default async function SignIn() {
             providerName="Google로 로그인"
             bgcolor="border-2 border-black dark:border-slate-50 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
           />
-          <SignInButton
-            provider="github"
-            providerName="Github로 로그인"
-            bgcolor="bg-black text-white hover:bg-slate-800"
-          />
+          {/*<SignInButton*/}
+          {/*  provider="github"*/}
+          {/*  providerName="Github로 로그인"*/}
+          {/*  bgcolor="bg-black text-white hover:bg-slate-800"*/}
+          {/*/>*/}
         </div>
       </div>
     </CenterLayout>
