@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     const result = await S3.send(
       new CompleteMultipartUploadCommand({
-        Bucket: "moveto-bucket",
+        Bucket: "moveto-v1",
         Key: fileKey,
         UploadId: uploadId,
         MultipartUpload: {

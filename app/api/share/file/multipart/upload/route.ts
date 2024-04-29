@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const signedUrls: string[] = []
   for (let i = 0; i < chunkInfos.length; i += 1) {
     const command = new UploadPartCommand({
-      Bucket: "moveto-bucket",
+      Bucket: "moveto-v1",
       Key: chunkInfos[i].fileKey,
       UploadId: chunkInfos[i].uploadId,
       PartNumber: chunkInfos[i].index,

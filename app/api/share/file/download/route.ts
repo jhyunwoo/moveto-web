@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const presignedUrl = await getSignedUrl(
       S3,
       new GetObjectCommand({
-        Bucket: "moveto-bucket",
+        Bucket: "moveto-v1",
         Key: shareInfo.id + "/" + shareInfo.files[i],
         ResponseContentDisposition: `attachment; filename="${shareInfo.files[i]}"`,
       }),

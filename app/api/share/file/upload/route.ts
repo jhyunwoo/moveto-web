@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const fileKey = shareId + "/" + files[i].name
 
     const command = new PutObjectCommand({
-      Bucket: "moveto-bucket",
+      Bucket: "moveto-v1",
       Key: fileKey,
       ContentType: files[i].type,
     })

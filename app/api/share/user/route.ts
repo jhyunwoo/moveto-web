@@ -35,13 +35,13 @@ export async function DELETE(request: Request) {
     }
 
     const command = new DeleteObjectsCommand({
-      Bucket: "moveto-bucket",
+      Bucket: "moveto-v1",
       Delete: {
         Objects: deleteObjects,
       },
     })
     try {
-      const { Deleted } = await S3.send(command)
+      await S3.send(command)
     } catch (err) {
       return NextResponse.json({ message: "Delete Objects Error" })
     }
