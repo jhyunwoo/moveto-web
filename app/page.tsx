@@ -60,7 +60,6 @@ export default function Home() {
           <div className="mr-auto pb-1 pl-2 text-xl font-semibold dark:text-white">
             코드
           </div>
-          <div className={'text-sm'}>시스템 점검: 2024년 6월 22일 ~ 23일</div>
         </div>
         <SearchFile ip={ip} />
       </div>
