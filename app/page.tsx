@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import SearchFile from "@/components/SearchFile"
 import replaceAll from "@/lib/replaceAll"
 import { headers } from "next/headers"
+import Link from "next/link"
 
 type Props = {
   searchParams: { [key: string]: string | undefined }
@@ -62,6 +63,7 @@ export default function Home() {
           </div>
         </div>
         <SearchFile ip={ip} />
+        <Link href={'https://beta.moveto.kr'} className={'hover:underline'}>새로운 Moveto 버전 출시! (Beta)</Link>
       </div>
     </div>
   )
