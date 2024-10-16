@@ -63,7 +63,7 @@ export default function Home() {
           </div>
         </div>
         <SearchFile ip={ip} />
-        <Link href={'https://beta.moveto.kr'} className={'hover:underline'}>새로운 Moveto 버전 출시! (Beta)</Link>
+        <Link href={'https://www.moveto.kr'} className={'hover:underline'}>새로운 Moveto 버전 출시! (Beta)</Link>
       </div>
     </div>
   )
